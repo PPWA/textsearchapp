@@ -15,8 +15,9 @@ import views.html.index;
 public class Application extends Controller {
 	
     public static Result index() {
-        return ok(index.render("Hello World!"));
-    }
+        return ok(index.render("Helljho World!"));
+    } 
+    
 
     public static Result addBar(){
     	Bar bar = Form.form(Bar.class).bindFromRequest().get();
