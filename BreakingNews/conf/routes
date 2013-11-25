@@ -4,7 +4,10 @@
 
 # Home page
 GET     /                           controllers.Application.index()
-GET		/new-topics					preparation.getNewTopics()
+GET		/new-topics					controllers.preparation.Preparation.getNewTopics(offset: Int ?=0)
+GET		/old-topics					controllers.preparation.Preparation.getOldTopics(offset: Int ?=0)
+GET		/similar-articles			controllers.preparation.Preparation.getSimilarArticles(art_id: Int ?=0)
+GET		/news-portals				controllers.preparation.Preparation.getNewsPortals()
 
 
 # Map static resources from the /public folder to the /assets URL path
