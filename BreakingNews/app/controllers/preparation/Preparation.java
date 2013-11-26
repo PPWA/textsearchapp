@@ -9,8 +9,23 @@ import views.html.index;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
+
+/**
+ * Allgemeine Aufbereitungsklasse
+ * @author Sebastian Mandel
+ * @version 1.0
+ */
 public class Preparation extends Controller {
 
+	/**
+	 * Geld auf Konto einzahlen.
+	 * <p>
+	 * Wenn vorher <code> getKontoStand() = x </code>
+	 * und <code> betrag >=0 </code>,
+	 * dann danach <code> getKontoStand() = x + betrag </code>
+	 * @param betrag positive Zahl, der einzuzahlende Betrag
+	 * @throws ArgumentNegativ wenn betrag negativ
+	 */
 	public static Result getNewTopics(String offsetS) {
 		int offset;
 		ObjectNode response = Json.newObject();
