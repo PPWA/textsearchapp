@@ -7,6 +7,6 @@ public class Acquisition {
 	}
 	
 	public static void startSearch() {
-		// h
+		
 	}
 }

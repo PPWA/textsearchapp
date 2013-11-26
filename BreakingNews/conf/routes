@@ -8,7 +8,7 @@ GET		/new-topics					controllers.preparation.Preparation.getNewTopics(offset: In
 GET		/old-topics					controllers.preparation.Preparation.getOldTopics(offset: Int ?=0)
 GET		/similar-articles			controllers.preparation.Preparation.getSimilarArticles(art_id: Int ?=0)
 GET		/news-portals				controllers.preparation.Preparation.getNewsPortals()
-POST	/start-search				controllers.acquisition.Acquisition.startSearch()
+GET		/start-search				controllers.acquisition.Acquisition.startSearch()
 
 
 # Map static resources from the /public folder to the /assets URL path
