@@ -4,9 +4,9 @@
 
 # Home page
 GET     /                           controllers.Application.index()
-GET		/new-topics					controllers.preparation.Preparation.getNewTopics(offset: Int ?=0)
-GET		/old-topics					controllers.preparation.Preparation.getOldTopics(offset: Int ?=0)
-GET		/similar-articles			controllers.preparation.Preparation.getSimilarArticles(art_id: Int ?=0)
+GET		/new-topics					controllers.preparation.Preparation.getNewTopics(offset: String ?="0")
+GET		/old-topics					controllers.preparation.Preparation.getOldTopics(offset: String ?="0")
+GET		/similar-articles			controllers.preparation.Preparation.getSimilarArticles(topichash: String ?="")
 GET		/news-portals				controllers.preparation.Preparation.getNewsPortals()
 GET		/start-search				controllers.acquisition.Acquisition.startSearch()
 
