@@ -1,11 +1,16 @@
 package controllers.preparation;
 
 import java.util.List;
+
+import models.Newsportal;
+
 import org.apache.lucene.document.Document;
+
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
+
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
@@ -31,6 +36,7 @@ public class Preparation extends Controller {
 		ObjectNode response = Json.newObject();
 		ObjectNode result = Json.newObject();
 		ArrayNode articles = result.arrayNode();
+		ObjectNode article;
 		Document document;
 		
 		try{
@@ -41,9 +47,9 @@ public class Preparation extends Controller {
 			return ok(index.render("Fehlerhafter Parameter"));
 		}
 		
-		List<Document> documents = Search.getDocumentsNew(offset);
+		List<Document> documents = Search.getDocumentsNewTopic(offset);
 		for (int i = 0; i < documents.size(); i++) {
-			ObjectNode article = Json.newObject();
+			article = Json.newObject();
 			document = documents.get(i);
 			article.put("isNew", document.get("isNew"));
 			article.put("art_id", document.get("id"));
@@ -66,6 +72,7 @@ public class Preparation extends Controller {
 		ObjectNode result = Json.newObject();
 		ArrayNode articles = result.arrayNode();
 		Document document;
+		ObjectNode article; 
 		int offset;
 		
 		try{
@@ -76,10 +83,10 @@ public class Preparation extends Controller {
 			return ok(index.render("Fehlerhafter Parameter"));
 		}
 		
-		List<Document> documents = Search.getDocumentsOld(offset);
+		List<Document> documents = Search.getDocumentsOldTopic(offset);
 
 		for (int i = 0; i < documents.size(); i++) {
-			ObjectNode article = Json.newObject();
+			article = Json.newObject();
 			document = documents.get(i);
 			article.put("isNew", document.get("isNew"));
 			article.put("art_id", document.get("id"));
@@ -101,9 +108,10 @@ public class Preparation extends Controller {
 		ObjectNode result = Json.newObject();
 		ArrayNode articles = result.arrayNode();
 		Document document;
+		ObjectNode article;
 		List<Document> documents = Search.getSimilarDocuments(topicHash);
 		for (int i = 0; i < documents.size(); i++) {
-			ObjectNode article = Json.newObject();
+			article = Json.newObject();
 			document = documents.get(i);
 			article.put("art_id", document.get("id"));
 			article.put("art_title", document.get("title"));
@@ -122,18 +130,17 @@ public class Preparation extends Controller {
 	public static Result getNewsPortals() {
 		ObjectNode response = Json.newObject();
 		ObjectNode result = Json.newObject();
-		ArrayNode newsPortals = result.arrayNode();
-		Document portalLucene;
-		List<Document> newsPortalsLucene = Search.getNewsPortals();
+		ArrayNode newsportals = result.arrayNode();
+		ObjectNode newsportal;
+		List<Newsportal> newsportalList = Search.getNewsportalList();
 
-		for (int i = 0; i < newsPortalsLucene.size(); i++) {
-			ObjectNode portal = Json.newObject();
-			portalLucene = newsPortalsLucene.get(i);
-			portal.put("art_id", portalLucene.get("name"));
-			portal.put("art_title", portalLucene.get("count"));
-			newsPortals.add(portal);
+		for (int i = 0; i < newsportalList.size(); i++) {
+			newsportal = Json.newObject();
+			newsportal.put("np_name", newsportalList.get(i).getName());
+			newsportal.put("np_count", newsportalList.get(i).getAnzahl());
+			newsportals.add(newsportal);
 		}
-		response.put("portals", newsPortals);
+		response.put("newsportals", newsportals);
 		return ok(response);
 	}
 }
