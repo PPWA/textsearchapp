@@ -15,7 +15,7 @@ import play.mvc.Result;
 public class Acquisition {
 	
 	public Acquisition() {
-		// TODO Auto-generated constructor stub
+		// TODO Auto-generated constructor
 	}
 	
 	public static Result startSearch() {
