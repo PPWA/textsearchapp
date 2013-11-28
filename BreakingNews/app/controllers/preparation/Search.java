@@ -29,13 +29,11 @@ public class Search {
 	private static boolean endNew = false;
 	private static ScoreDoc lastDocOld;
 	private static boolean endOld = false;
-
 	private final static String NEWTOPICQUERY = "1";
 	private final static String OLDTOPICQUERY = "2";
 	private static int hitsPerPage = 5;
 	private static String indexPath = "index";
 	private static int timeframe = 20000;
-	
 	private static IndexReader reader;
 
 	public static IndexSearcher getSearcher() throws Exception {
@@ -56,24 +54,24 @@ public class Search {
 		return Integer.parseInt(df.format(c.getTime()));
 	}
 	
-	public static List<Document> getDocumentsNewTopic(int offset) {
+	public static List<Document> getDocumentsNewTopic(int offset, String keyword) {
 		String querystr = NEWTOPICQUERY;
 		String queryfield = "isNew";
-		return getResults(querystr, queryfield,  offset, endNew, lastDocNew, NEWTOPICQUERY);
+		return getResults(querystr, queryfield,  offset, endNew, lastDocNew, NEWTOPICQUERY, keyword);
 	}
 
 	public static List<Document> getDocumentsOldTopic(int offset) {
 
 		String querystr = OLDTOPICQUERY;
 		String queryfield = "isNew";
-		return getResults(querystr, queryfield,  offset, endOld, lastDocOld, OLDTOPICQUERY);
+		return getResults(querystr, queryfield,  offset, endOld, lastDocOld, OLDTOPICQUERY,"");
 	}
 	
 	public static List<Document> getSimilarDocuments(String topicHash) {
 
 		String querystr = topicHash;
 		String queryfield = "topicHash";
-		return getResults(querystr, queryfield,  0, false, null, "");
+		return getResults(querystr, queryfield,  0, false, null, "","");
 	}
 
 	public static List<Newsportal> getNewsportalList() {
@@ -122,7 +120,7 @@ public class Search {
 		}
 	}
 	
-	public static List<Document> getResults(String querystr, String queryfield, int offset, boolean end, ScoreDoc lastDoc, String k) {
+	public static List<Document> getResults(String querystr, String queryfield, int offset, boolean end, ScoreDoc lastDoc, String k, String keyword) {
 		try {
 			List<Document> documents = new ArrayList<Document>();
 			ScoreDoc[] hits = null;
@@ -134,6 +132,10 @@ public class Search {
 			Query query2 = NumericRangeQuery.newIntRange("date", getLowerBound(), getUpperBound(), true, true);
 			booleanQuery.add(query1, BooleanClause.Occur.MUST);
 			booleanQuery.add(query2, BooleanClause.Occur.MUST);
+			if (!keyword.equals("")){
+				Query query3 = new TermQuery(new Term("text", keyword));
+				booleanQuery.add(query3, BooleanClause.Occur.MUST);
+			}
 
 			if (offset == 0) {
 				end = false;

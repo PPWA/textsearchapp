@@ -31,7 +31,7 @@ public class Preparation extends Controller {
 	 * @param betrag positive Zahl, der einzuzahlende Betrag
 	 * @throws ArgumentNegativ wenn betrag negativ
 	 */
-	public static Result getNewTopics(String offsetS) {
+	public static Result getNewTopics(String offsetS, String keyword) {
 		int offset;
 		ObjectNode response = Json.newObject();
 		ObjectNode result = Json.newObject();
@@ -47,7 +47,7 @@ public class Preparation extends Controller {
 			return ok(index.render("Fehlerhafter Parameter"));
 		}
 		
-		List<Document> documents = Search.getDocumentsNewTopic(offset);
+		List<Document> documents = Search.getDocumentsNewTopic(offset, keyword);
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
