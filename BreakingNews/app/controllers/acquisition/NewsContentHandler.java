@@ -1,5 +1,7 @@
 package controllers.acquisition;
 
+import java.io.IOException;
+
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
@@ -14,23 +16,54 @@ public class NewsContentHandler implements ContentHandler {
 	private String publicationDate;
 	private String urlSource;
 	private String urlPicture;
-	private String text;
+	private StringBuffer textBuf;
 	
 	private boolean isInItem = false;
+	private boolean isEndOfDocument = false;
+	
+	private boolean isExtractedText = false;
 	
 	public NewsContentHandler() {
-		System.out.println("NewsContentHandler()");
 		newsPortal = "";
 		title = "";
 		publicationDate = "";
 		urlSource = "";
 		urlPicture = "";
-		text = "";
+		textBuf = new StringBuffer();
 	}
 
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
-		currentValue = new String(ch, start, length);
+		StringBuffer buf = new StringBuffer();
+		for (int i = start; i < start + length; i++) {
+		    switch (ch[i]) {
+		    case '\\':
+		    	buf.append("\\\\");
+		    	break;
+		    case '"':
+				buf.append("\\\"");
+				break;
+		    case '\n':
+//		    	buf.append("\\n");
+		    	buf.append(" ");
+				break;
+		    case '\r':
+				buf.append("\\r");
+				break;
+		    case '\t':
+				buf.append("\\t");
+				break;
+		    default:
+				buf.append(ch[i]);
+				break;
+		    }
+		}
+		
+//		currentValue = new String(ch, start, length);
+		currentValue = buf.toString();
+		
+		if(isExtractedText)
+			textBuf.append(buf);
 	}
 
 	@Override
@@ -40,10 +73,11 @@ public class NewsContentHandler implements ContentHandler {
 		if (localName.equals("item")) {
 			isInItem = true;
 		}
-		
-		// article picture-url:
-		if (localName.equals("media:content") && isInItem) {
+		if (localName.equals("enclosure") && isInItem) {	// picture-url
 			urlPicture = attr.getValue("url");
+		} 
+		if (localName.equals("ExtractedText") && isInItem) {
+			isExtractedText = true;
 		}
 	}
 
@@ -55,76 +89,86 @@ public class NewsContentHandler implements ContentHandler {
 			isInItem = false;
 		}
 		
-		// newsPortal:
-		if (localName.equals("title") && !isInItem) {
+		if (localName.equals("title") && !isInItem) {	// newsPortal-title
 			newsPortal = currentValue;
 		}
-		// article title:
-		if (localName.equals("title") && isInItem) {
+		if (localName.equals("title") && isInItem) {	// article-title
 			title = currentValue;
 		}
-		// article date:
 		if (localName.equals("pubDate") && isInItem) {
 			publicationDate = currentValue;
 		}
-		// article url:
-		if (localName.equals("guid") && isInItem) {
+//		if (localName.equals("guid") && isInItem) {
+		if (localName.equals("link") && isInItem) {
 			urlSource = currentValue;
 		}
-		// article text:
 		if (localName.equals("ExtractedText") && isInItem) {
-			text = currentValue;
-		}
+			isExtractedText = false;
+		} 
 	}
 	
 	@Override
 	public void endDocument() throws SAXException {
-		System.out.println(newsPortal+" | "+title+" | "+publicationDate+" | "+urlSource+" | "+urlPicture+" | "+text);
+		System.out.println("Portal: "+newsPortal+"\nTitel: "+title+"\nDatum: "+publicationDate+"\nSrc: "+urlSource+"\nPic: "+urlPicture+"\nText: "+textBuf.toString());
+		isEndOfDocument = true;
+	}
+	
+	
+	public String getXMLString() {
+		return ("Portal: "+newsPortal+"\nTitel: "+title+"\nDatum: "+publicationDate+"\nSrc: "+urlSource+"\nPic: "+urlPicture+"\n\nText: "+textBuf.toString());
+	}
+	
+	public boolean hasStoppedReading() {
+		return isEndOfDocument;
+	}
+	
+	public String getNewsPortal() {
+		return newsPortal;
 	}
 
-	@Override
-	public void endPrefixMapping(String arg0) throws SAXException {
-		// TODO Auto-generated method stub
-		
+	public String getTitle() {
+		return title;
 	}
+
+	public String getPublicationDate() {
+		return publicationDate;
+	}
+
+	public String getUrlSource() {
+		return urlSource;
+	}
+
+	public String getUrlPicture() {
+		return urlPicture;
+	}
+
+	public String getText() {
+		return textBuf.toString();
+	}
+	
+
+	@Override
+	public void endPrefixMapping(String arg0) throws SAXException { }
 
 	@Override
 	public void ignorableWhitespace(char[] arg0, int arg1, int arg2)
-			throws SAXException {
-		// TODO Auto-generated method stub
-		
-	}
+			throws SAXException { }
 
 	@Override
 	public void processingInstruction(String arg0, String arg1)
-			throws SAXException {
-		// TODO Auto-generated method stub
-		
-	}
+			throws SAXException { }
 
 	@Override
-	public void setDocumentLocator(Locator arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void setDocumentLocator(Locator arg0) { }
 
 	@Override
-	public void skippedEntity(String arg0) throws SAXException {
-		// TODO Auto-generated method stub
-		
-	}
+	public void skippedEntity(String arg0) throws SAXException { }
 
 	@Override
-	public void startDocument() throws SAXException {
-		// TODO Auto-generated method stub
-		
-	}
+	public void startDocument() throws SAXException { }
 
 	@Override
 	public void startPrefixMapping(String arg0, String arg1)
-			throws SAXException {
-		// TODO Auto-generated method stub
-		
-	}
+			throws SAXException { }
 
 }
