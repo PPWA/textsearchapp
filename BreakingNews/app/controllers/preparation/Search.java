@@ -23,66 +23,171 @@ import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.store.FSDirectory;
 
+/**
+ * Erzeugt je nach Anfrage der Klasse Preparation eine Query, stellt diese an
+ * den persistenten Lucene-Index und liefert die Suchergebnisse an die
+ * aufrufende Stelle zur&uuml;ck.
+ * 
+ * @author Sebastian Mandel
+ * @version 1.0
+ */
 public class Search {
 
+	/**
+	 * Speichert das zuletzt ermittelte Dokument bei Suchanfragen f&uuml;r neue
+	 * Themen
+	 */
 	private static ScoreDoc lastDocNew;
+	/**
+	 * Speichert den Zustand, ob Ende der Suchergebnisliste f&uuml;r neue Themen
+	 * erreicht ist.
+	 */
 	private static boolean endNew = false;
+	/**
+	 * Speichert das zuletzt ermittelte Dokument bei Suchanfragen f&uuml;r bereits
+	 * bekannte Themen
+	 */
 	private static ScoreDoc lastDocOld;
+	/**
+	 * Speichert den Zustand, ob Ende der Suchergebnisliste f&uuml;r bereits bekannte
+	 * Themen erreicht ist.
+	 */
 	private static boolean endOld = false;
+	/**
+	 * Suchbegriff zur Ermittelung von Artikeln mit neuen Themen
+	 */
 	private final static String NEWTOPICQUERY = "1";
+	/**
+	 * Suchbegriff zur Ermittelung von Artikeln mit bereits bekannten Themen
+	 */
 	private final static String OLDTOPICQUERY = "2";
+	/**
+	 * Anzahl der zu ermittelnden Suchergebnisse, wenn Liste mit Listenbeginn
+	 * startet
+	 */
 	private static int hitsPerPage = 5;
+	/**
+	 * Indentifier f&uuml;r den Index auf der Festplatte
+	 */
 	private static String indexPath = "index";
+	/**
+	 * Gibt in ganzen Tagen an, wie weit bei Suchanfragen in die Vergangenheit
+	 * zur&uuml;ckgeschaut werden soll
+	 */
 	private static int timeframe = 20000;
+	/**
+	 * Globale Referenz auf den Reader f&uuml;r alle Suchanfragen.
+	 */
 	private static IndexReader reader;
 
+	/**
+	 * &ouml;ffnet einen SuchReader auf dem angegebenen Index auf der Festplatte und
+	 * gibt ihn zur&uuml;ck.
+	 * 
+	 * @return eine Referenz auf den SearchReader
+	 * @throws Exception
+	 *             wenn der spezifizierte Index nicht vorhanden ist.
+	 */
 	public static IndexSearcher getSearcher() throws Exception {
 		reader = DirectoryReader.open(FSDirectory.open(new File(indexPath)));
 		return new IndexSearcher(reader);
 	}
-	
-	public static int getUpperBound(){
+
+	/**
+	 * Gibt das aktuelle Datum als Integer zur&uuml;ck.
+	 * 
+	 * @return das aktuelle Datum als Integer
+	 */
+	public static int getUpperBound() {
 		DateFormat df = new SimpleDateFormat("yyyymmdd");
 		return Integer.parseInt(df.format(new Date()));
 	}
-	
-	public static int getLowerBound(){
+
+	/**
+	 * Ermittelt das Datum f&uuml;r den Beginn des Zeitfensters, das f&uuml;r alle Suchen
+	 * verwendet wird.
+	 * 
+	 * @return Den Beginn des Suchzeitraumes
+	 */
+	public static int getLowerBound() {
 		Calendar c = Calendar.getInstance();
 		c.setTime(new Date());
 		c.add(Calendar.DAY_OF_MONTH, -timeframe);
 		DateFormat df = new SimpleDateFormat("yyyymmdd");
 		return Integer.parseInt(df.format(c.getTime()));
 	}
-	
+
+	/**
+	 * Erzeugt Suchbedingungen f&uuml;r die Suche nach neuen Themen und stellt die
+	 * Anfrage an die zentrale Suchfunktion
+	 * 
+	 * @param offset
+	 *            Flag, ob Ergebnisliste von vorn beginnt oder an letzter
+	 *            bekannter Position fortgesetzt wird.
+	 * @param keyword
+	 *            Suchbegriff f&uuml;r die Volltextsuche
+	 * @return Eine Liste der aktuellsten Dokumente innerhalb des Suchzeitraumes
+	 *         mit neuen Themen
+	 */
 	public static List<Document> getDocumentsNewTopic(int offset, String keyword) {
 		String querystr = NEWTOPICQUERY;
 		String queryfield = "isNew";
-		return getResults(querystr, queryfield,  offset, endNew, lastDocNew, NEWTOPICQUERY, keyword);
+		return getResults(querystr, queryfield, offset, endNew, lastDocNew,
+				NEWTOPICQUERY, keyword);
 	}
 
+	/**
+	 * Erzeugt Suchbedingungen f&uuml;r die Suche nach bereits bekannten Themen und
+	 * stellt die Anfrage an die zentrale Suchfunktion
+	 * 
+	 * @param offset
+	 *            Flag, ob Ergebnisliste von vorn beginnt oder an letzter
+	 *            bekannter Position fortgesetzt wird.
+	 * @return Eine Liste der aktuellsten Dokumente innerhalb des Suchzeitraumes
+	 *         mit bereits bekannten Themen
+	 */
 	public static List<Document> getDocumentsOldTopic(int offset) {
 
 		String querystr = OLDTOPICQUERY;
 		String queryfield = "isNew";
-		return getResults(querystr, queryfield,  offset, endOld, lastDocOld, OLDTOPICQUERY,"");
+		return getResults(querystr, queryfield, offset, endOld, lastDocOld,
+				OLDTOPICQUERY, "");
 	}
-	
+
+	/**
+	 * Erzeugt Suchbedingungen f&uuml;r die Suche nach neuen Themen und stellt die
+	 * Anfrage an die zentrale Suchfunktion
+	 * 
+	 * @param topicHash
+	 *            Identifier f&uuml;r das Thema, nach dessen zugeh&ouml;rigen Artikeln
+	 *            gesucht werden soll
+	 * @return Eine Liste der aktuellsten Dokumente innerhalb des Suchzeitraumes
+	 *         die zu dem angegebenen Thema passen
+	 */
 	public static List<Document> getSimilarDocuments(String topicHash) {
 
 		String querystr = topicHash;
 		String queryfield = "topicHash";
-		return getResults(querystr, queryfield,  0, false, null, "","");
+		return getResults(querystr, queryfield, 0, false, null, "", "");
 	}
 
+	/**
+	 * Erzeugt f&uuml;r jedes individuelle Newsportal ein Objekt und ermittelt die
+	 * Anzahl der jeweils publizierten Artikel mit neuen Themen innerhalb des
+	 * Suchzeitraumes.
+	 * 
+	 * @return Eine Liste von Newsportal-Objekten
+	 */
 	public static List<Newsportal> getNewsportalList() {
-		String lastName ="";
-		String currentName ="";
+		String lastName = "";
+		String currentName = "";
 		Newsportal currentNewsportal = null;
 		List<Newsportal> newsportalList = new ArrayList<Newsportal>();
 		List<Document> documents = getAllResultsNewTopic();
+
 		for (int i = 0; i < documents.size(); i++) {
-			currentName = documents.get(i).get("newsportal"); 
-			if (!currentName.equals(lastName)){
+			currentName = documents.get(i).get("newsportal");
+			if (!currentName.equals(lastName)) {
 				currentNewsportal = new Newsportal(currentName);
 				currentNewsportal.raise();
 				newsportalList.add((currentNewsportal));
@@ -93,60 +198,91 @@ public class Search {
 		}
 		return newsportalList;
 	}
-	
-	public static List<Document> getAllResultsNewTopic(){
+
+	/**
+	 * Erstellt eine Suchanfrage zur Ermittlung aller Dokumente mit neuen Themen
+	 * innerhalb des Suchzeitraumes und stellt die Anfrage an den Lucene-Index.
+	 * 
+	 * @return Eine Liste aller Dokumente innerhalb des Suchzeitraumes, die ein
+	 *         neues Thema enthalten
+	 */
+	public static List<Document> getAllResultsNewTopic() {
 		try {
 			List<Document> documents = new ArrayList<Document>();
-			Sort sort = new Sort(new SortField("date", SortField.Type.STRING,true));
+			Sort sort = new Sort(new SortField("date", SortField.Type.STRING,
+					true));
 			ScoreDoc[] hits = null;
 			IndexSearcher searcher = getSearcher();
-			
+
+			// Erstellung der Suchanfrage
 			BooleanQuery booleanQuery = new BooleanQuery();
 			Query query1 = new TermQuery(new Term("isNew", NEWTOPICQUERY));
-			Query query2 = NumericRangeQuery.newIntRange("date", getLowerBound(), getUpperBound(), true, true);
+			Query query2 = NumericRangeQuery.newIntRange("date",
+					getLowerBound(), getUpperBound(), true, true);
 			booleanQuery.add(query1, BooleanClause.Occur.MUST);
 			booleanQuery.add(query2, BooleanClause.Occur.MUST);
-			int count = searcher.search(booleanQuery,1).totalHits;
-			hits = searcher.search(booleanQuery,count,sort).scoreDocs;
-			
+			int count = searcher.search(booleanQuery, 1).totalHits;
+			hits = searcher.search(booleanQuery, count, sort).scoreDocs;
+
 			for (int i = 0; i < hits.length; ++i) {
 				int docId = hits[i].doc;
 				Document d = searcher.doc(docId);
 				documents.add(d);
 			}
 			return documents;
-		} catch(Exception e){
+		} catch (Exception e) {
 			return new ArrayList<Document>();
 		}
 	}
-	
-	public static List<Document> getResults(String querystr, String queryfield, int offset, boolean end, ScoreDoc lastDoc, String k, String keyword) {
+
+	/**
+	 * Erstellt verschiedene Suchanfragen und stellt die Anfrage an den Lucene-Index.
+	 * 
+	 * @param querystr Suchbegriff
+	 * @param queryfield Suchfeld, in denen der Suchbegriff vorhanden sein muss
+	 * @param Flag, ob Liste neu beginnen oder an bestimmter Stelle fortgesetzt werden soll
+	 * @param end Flag, ob bei letzten Suchvorgang das Ende der Liste bereits erreicht wurde
+	 * @param lastDoc Speichert das zuletzt ermittelte Dokument der letzten Suchanfrage
+	 * @param Zeigt an, ob es sich um eine Suchanfrage nach neuen oder nach bereits bekannten Themen handelt
+	 * @param keyword Sekund&auml;rer Suchbegriff f&uuml;r die Volltextsuche im Nachrichteninhalt
+	 * @return Eine Liste der aktuellsten Dokumente, die allen Suchbedingungen entsprechen
+	 */
+	public static List<Document> getResults(String querystr, String queryfield,
+			int offset, boolean end, ScoreDoc lastDoc, String k, String keyword) {
 		try {
 			List<Document> documents = new ArrayList<Document>();
 			ScoreDoc[] hits = null;
-			Sort sort = new Sort(new SortField("date", SortField.Type.STRING,true));
+			Sort sort = new Sort(new SortField("date", SortField.Type.STRING,
+					true));
 			IndexSearcher searcher = getSearcher();
 
+			// Erstellung der Suchanfrage
 			BooleanQuery booleanQuery = new BooleanQuery();
 			Query query1 = new TermQuery(new Term(queryfield, querystr));
-			Query query2 = NumericRangeQuery.newIntRange("date", getLowerBound(), getUpperBound(), true, true);
+			Query query2 = NumericRangeQuery.newIntRange("date",
+					getLowerBound(), getUpperBound(), true, true);
 			booleanQuery.add(query1, BooleanClause.Occur.MUST);
 			booleanQuery.add(query2, BooleanClause.Occur.MUST);
-			if (!keyword.equals("")){
+			if (!keyword.equals("")) {
 				Query query3 = new TermQuery(new Term("text", keyword));
 				booleanQuery.add(query3, BooleanClause.Occur.MUST);
 			}
 
 			if (offset == 0) {
+				// Listenanfang
 				end = false;
 				hits = searcher.search(booleanQuery, hitsPerPage, sort).scoreDocs;
 			} else {
+				// Listenfortsetzung
 				if (end) {
 					hits = null;
 				} else {
 					hits = searcher.searchAfter(lastDoc, booleanQuery, 3, sort).scoreDocs;
 				}
 			}
+
+			// Caching des jeweils letzten Dokuments der Suchanfrage, damit
+			// searchAfter() ausgef&uuml;hrt werden kann
 			try {
 				lastDoc = hits[hits.length - 1];
 				for (int i = 0; i < hits.length; ++i) {
