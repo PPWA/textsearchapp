@@ -8,6 +8,7 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.IntField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -47,11 +48,58 @@ public class Analysis {
 		try {
 			doc.add(new StringField("isNew", "1", Field.Store.YES));
 			doc.add(new StringField("topicHash", "hallo", Field.Store.YES));
-			doc.add(new StringField("date", "20001211", Field.Store.YES));
+			doc.add(new IntField("date", 20001211, Field.Store.YES));
+			doc.add(new StringField("newsportal", "Spiegel", Field.Store.YES));
 			getWriter().addDocument(doc);
 			getWriter().close();
 		} catch (Exception e) {
 
+		}
+	}
+	
+	public static void test(){
+		try {
+		dir = FSDirectory.open(new File("index"));
+		Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
+		iwc = new IndexWriterConfig(Version.LUCENE_46, analyzer);
+		iwc.setOpenMode(OpenMode.CREATE);
+		
+		Document doc = new Document();
+
+			doc.add(new StringField("isNew", "1", Field.Store.YES));
+			doc.add(new StringField("topicHash", "hallo", Field.Store.YES));
+			doc.add(new IntField("date", 20001211, Field.Store.YES));
+			doc.add(new StringField("newsportal", "Spiegel", Field.Store.YES));
+			IndexWriter writer = new IndexWriter(dir, iwc);
+			writer.addDocument(doc);
+			
+			doc = new Document();
+
+			doc.add(new StringField("isNew", "1", Field.Store.YES));
+			doc.add(new StringField("topicHash", "hallo", Field.Store.YES));
+			doc.add(new IntField("date", 20001211, Field.Store.YES));
+			doc.add(new StringField("newsportal", "Spiegel", Field.Store.YES));
+			writer.addDocument(doc);
+			
+			doc = new Document();
+
+			doc.add(new StringField("isNew", "1", Field.Store.YES));
+			doc.add(new StringField("topicHash", "hallo", Field.Store.YES));
+			doc.add(new IntField("date", 20001211, Field.Store.YES));
+			doc.add(new StringField("newsportal", "Welt", Field.Store.YES));
+			writer.addDocument(doc);
+			
+			doc = new Document();
+
+			doc.add(new StringField("isNew", "0", Field.Store.YES));
+			doc.add(new StringField("topicHash", "hallo", Field.Store.YES));
+			doc.add(new IntField("date", 20001211, Field.Store.YES));
+			doc.add(new StringField("newsportal", "Welt", Field.Store.YES));
+			writer.addDocument(doc);
+			
+			writer.close();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
 		}
 	}
 }

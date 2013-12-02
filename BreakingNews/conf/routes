@@ -4,7 +4,7 @@
 
 # Home page
 GET     /                           controllers.Application.index()
-GET		/new-topics					controllers.preparation.Preparation.getNewTopics(offset: String ?="0")
+GET		/new-topics					controllers.preparation.Preparation.getNewTopics(offset: String ?="0", keyword: String ?="")
 GET		/old-topics					controllers.preparation.Preparation.getOldTopics(offset: String ?="0")
 GET		/similar-articles			controllers.preparation.Preparation.getSimilarArticles(topichash: String ?="")
 GET		/news-portals				controllers.preparation.Preparation.getNewsPortals()
