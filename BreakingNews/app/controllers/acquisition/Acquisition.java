@@ -1,6 +1,7 @@
 package controllers.acquisition;
 
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -17,9 +18,11 @@ public class Acquisition {
 	
 	private Analysis analysis;
 	private static NewsContentHandler handl;
+	private static String latestXMLPath;
 	
 	public Acquisition() {
 		analysis = new Analysis();
+		latestXMLPath = "";
 	}
 	
 	public static Result startSearch() {
@@ -48,6 +51,23 @@ public class Acquisition {
 		System.out.println("Getting back result!");
 	} */
 	
+	private static String[] searchNewXMLFiles(String directory) {
+		String[] newXMLFiles = new String[10];
+		int j = 0;
+		
+		File file = new File(directory);
+		String[] xmlFiles = file.list();
+		for(int i=0; i<xmlFiles.length; i++) {
+			if(xmlFiles[i] != latestXMLPath) {
+				newXMLFiles[j++] = xmlFiles[i];
+			} else {
+				break;
+			}
+		}
+		
+		if(j==0) System.out.println("No new XML files found.");
+		return newXMLFiles;
+	}
 	
 	private static void readXMLFile(String pathToFile, NewsContentHandler handl) {
 		try {
@@ -71,11 +91,4 @@ public class Acquisition {
 			e.printStackTrace();
 		}
 	}
-	
-	// for testing:
-/*	public static void main(String[] args) {
-		Acquisition ac = new Acquisition();
-//		ac.readXMLFile("RSS1916018878.xml", new NewsContentHandler());
-		ac.startSearchTEST();
-	}  */
 }

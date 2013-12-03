@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /* globaler Reset */
 
 *, html, body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h5, h5, h6, pre, form, label, fieldset, input, p, blockquote, th, td {
@@ -258,3 +259,265 @@ fieldset {
     height: auto;
     margin: 10px;
 }
+=======
+/* globaler Reset */
+
+*, html, body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h5, h5, h6, pre, form, label, fieldset, input, p, blockquote, th, td {
+    margin: 0;
+    padding: 0;
+}
+
+table {
+    border-collapse: collapse;
+    border-spacing: 0;
+}
+
+fieldset, img {
+    border: 0;
+}
+
+address, caption, cite, code, dfn, em, strong, th, var {
+    font-style: normal;
+    font-weight: normal;
+}
+
+ol, ul, li {
+    list-style: none;
+}
+
+caption, th {
+    text-align: left;
+}
+
+h1, h2, h3, h5, h5, h6 {
+    font-size: 100%;
+    font-weight: normal;
+}
+
+q:before, q:after {
+    content: '';
+}
+
+/* globaler reset-RESET */
+/* Das Folgende restauriert ein paar sinnvolle Standards */
+strong {
+    font-weight: bold;
+}
+
+em {
+    font-style: italic;
+}
+
+
+/*Formatierung*/
+/*Layout*/
+
+header, nav, section, article, aside, footer {
+    display: block;
+    overflow: hidden;
+}
+
+h1 {
+    text-indent: -9999px;
+    background: url(../images/logoneu.png) no-repeat;
+    width: 1024px;
+    height: 150px;
+    position: relative;
+    top: 0px;
+    left: -300px;
+}
+
+h2 {
+    text-indent: -9999px;
+    position: absolute;
+    left: -300px;
+}
+
+
+div {
+    position: relative;
+}
+
+    div.header {
+        width: 1024px;
+        height: 100px;
+        top:10px;
+        right: -163px;
+        background: url(../images/headerEB.png);
+        z-index: 2;
+    }
+
+        div.header div {
+            margin: 0 auto;
+            width: 650px;
+        }
+
+    div.wrapper {
+        top:20px;
+        margin: 0 auto ;
+        width: 1024px;
+        height: 2000px;
+        background: url(../images/wrapper.png);
+        z-index: 1;
+    }
+
+
+body {
+    background: url(../images/bg_hgrau2.jpg) top center no-repeat fixed;
+}
+
+header.site, section, footer.site {
+    width: 980px;
+    clear: both;
+    margin: 0 auto;
+}
+
+section {
+    background-color: black;
+}
+
+nav, article, aside {
+    float: left;
+}
+
+article {
+    padding: 0 20px;
+    /*background-color: red;*/
+    width: 470px;
+    _width: 430px;
+}
+
+aside {
+    /*background-color: grey;*/
+    padding: 0 20px;
+    width: 200px;
+    _width: 170px;
+}
+
+
+
+/* Navigation */
+
+ul.nav {
+    width: 380px;
+    height: 30px;
+    padding: 16px 0 0 0;
+    position: absolute;
+    top: 41px;
+    right: -320px;
+    text-align: center;
+}
+
+    ul.nav li {
+        font: 14px/14px Georgia, 'Times New Roman', Times, serif;
+        color: white;
+        display: inline;
+    }
+
+        ul.nav li a {
+            color: white;
+            text-decoration: none;
+        }
+
+            ul.nav li a:hover {
+                color: darkgrey;
+            }
+
+
+/*Button*/
+
+.btnRefresh {
+    background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #0f0f98), color-stop(1, #362a2a) );
+    background: -moz-linear-gradient( center top, #0f0f98 5%, #362a2a 100% );
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#0f0f98', endColorstr='#362a2a');
+    background-color: #0f0f98;
+    -webkit-border-top-left-radius: 15px;
+    -moz-border-radius-topleft: 15px;
+    border-top-left-radius: 15px;
+    -webkit-border-top-right-radius: 15px;
+    -moz-border-radius-topright: 15px;
+    border-top-right-radius: 15px;
+    -webkit-border-bottom-right-radius: 0px;
+    -moz-border-radius-bottomright: 0px;
+    border-bottom-right-radius: 0px;
+    -webkit-border-bottom-left-radius: 0px;
+    -moz-border-radius-bottomleft: 0px;
+    border-bottom-left-radius: 0px;
+    text-indent: 0;
+    border: 1px solid #469df5;
+    display: inline-block;
+    color: black;
+    font-family: Arial;
+    font-size: 15px;
+    font-weight: bold;
+    font-style: normal;
+    height: 40px;
+    line-height: 40px;
+    width: 86px;
+    text-decoration: none;
+    text-align: center;
+}
+
+    .btnRefresh:hover {
+        background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #362a2a), color-stop(1, #0f0f98) );
+        background: -moz-linear-gradient( center top, #362a2a 5%, #0f0f98 100% );
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#362a2a', endColorstr='#0f0f98');
+        background-color: #362a2a;
+    }
+
+    .btnRefresh:active {
+        position: relative;
+        top: 1px;
+    }
+
+/*Diagramm*/
+div.progress-container {
+    border: 1px solid #ccc;
+    margin: 2px 5px 2px 0;
+    padding: 1px;
+    float: left;
+    background: white;
+}
+
+    div.progress-container > div {
+        background-color: #ACE97C;
+        height: 12px;
+    }
+
+fieldset {
+    margin-bottom: 10px;
+}
+
+
+/*Klassen*/
+
+.artikel_neu {
+    float: left;
+    display: block;
+    background-color: white;
+    border: 5px solid rgb(30, 182, 0);
+    width: 400px;
+    height: auto;
+    margin: 10px;
+}
+
+.artikel_alt {
+    float: left;
+    display: block;
+    background-color: white;
+    border: 5px solid rgb(55, 55, 55);
+    width: 200px;
+    height: auto;
+    margin: 10px;
+}
+
+.diagramm {
+    float: left;
+    display: block;
+    background-color: white;
+    border: 5px solid rgb(255, 106, 0);
+    width: 200px;
+    height: auto;
+    margin: 10px;
+}
+>>>>>>> refs/remotes/origin/master
