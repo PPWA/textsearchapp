@@ -71,7 +71,7 @@ public class Search {
 	/**
 	 * Indentifier f&uuml;r den Index auf der Festplatte
 	 */
-	private static String indexPath = "index";
+	private static String indexPath = "index2";
 	/**
 	 * Gibt in ganzen Tagen an, wie weit bei Suchanfragen in die Vergangenheit
 	 * zur&uuml;ckgeschaut werden soll

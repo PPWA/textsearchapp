@@ -26,7 +26,7 @@ public class Analysis {
 
 	public static void initIndex() {
 		try {
-			dir = FSDirectory.open(new File("index"));
+			dir = FSDirectory.open(new File("index2"));
 			Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
 			iwc = new IndexWriterConfig(Version.LUCENE_46, analyzer);
 			iwc.setOpenMode(OpenMode.CREATE);
