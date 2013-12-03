@@ -1,14 +1,20 @@
 package controllers.preparation;
 
 import java.util.List;
+
 import models.Newsportal;
+
 import org.apache.lucene.document.Document;
+
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
+
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import controllers.analysis.Analysis;
 
 /**
  * Erzeugt aus den von der Klasse Search erhaltenen Ergebnissen eine Ausgabe im
@@ -53,15 +59,13 @@ public class Preparation extends Controller {
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
-			article.put("isNew", document.get("isNew"));
-			article.put("art_id", document.get("id"));
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
 			article.put("art_date", document.get("date"));
 			article.put("art_urlsource", document.get("urlsource"));
-			article.put("art_picture", document.get("picture"));
+			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
-			article.put("art_topicHash", document.get("topicHash"));
+			article.put("art_topichash", document.get("topichash"));
 			article.put("art_explanation", document.get("explanation"));
 			articles.add(article);
 		}
@@ -103,15 +107,13 @@ public class Preparation extends Controller {
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
-			article.put("isNew", document.get("isNew"));
-			article.put("art_id", document.get("id"));
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
 			article.put("art_date", document.get("date"));
 			article.put("art_urlsource", document.get("urlsource"));
-			article.put("art_picture", document.get("picture"));
+			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
-			article.put("art_topicHash", document.get("topicHash"));
+			article.put("art_topichash", document.get("topichash"));
 			articles.add(article);
 		}
 		response.put("articles", articles);
@@ -139,14 +141,13 @@ public class Preparation extends Controller {
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
-			article.put("art_id", document.get("id"));
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
 			article.put("art_date", document.get("date"));
 			article.put("art_urlsource", document.get("urlsource"));
-			article.put("art_picture", document.get("picture"));
+			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
-			article.put("art_topichash", document.get("topicHash"));
+			article.put("art_topichash", document.get("topichash"));
 			articles.add(article);
 		}
 		response.put("articles", articles);

@@ -66,35 +66,55 @@ public class Analysis {
 		
 		Document doc = new Document();
 
-			doc.add(new StringField("isNew", "1", Field.Store.YES));
-			doc.add(new StringField("topicHash", "hallo", Field.Store.YES));
-			doc.add(new IntField("date", 20001211, Field.Store.YES));
+			doc.add(new StringField("isNew", "1", Field.Store.YES));	
+			doc.add(new StringField("topichash", "gC73x8", Field.Store.YES));
+			doc.add(new StringField("title", "Überschwemmung in Peru", Field.Store.YES));
+			doc.add(new StringField("teaser", "Heute kam es in ...", Field.Store.YES));
+			doc.add(new IntField("date", 20001219, Field.Store.YES));
 			doc.add(new StringField("newsportal", "Spiegel", Field.Store.YES));
+			doc.add(new StringField("urlsource", "http://bit.ly/0815", Field.Store.YES));
+			doc.add(new StringField("urlpicture", "http://bit.ly/2.jpg", Field.Store.YES));
+			doc.add(new StringField("explanation", "Neue Wörter ...", Field.Store.YES));
 			IndexWriter writer = new IndexWriter(dir, iwc);
 			writer.addDocument(doc);
 			
 			doc = new Document();
 
 			doc.add(new StringField("isNew", "1", Field.Store.YES));
-			doc.add(new StringField("topicHash", "hallo", Field.Store.YES));
-			doc.add(new IntField("date", 20001211, Field.Store.YES));
+			doc.add(new StringField("topichash", "gC73x8", Field.Store.YES));
+			doc.add(new StringField("title", "Überschwemmung in Peru", Field.Store.YES));
+			doc.add(new StringField("teaser", "Heute kam es in ...", Field.Store.YES));
+			doc.add(new IntField("date", 20001216, Field.Store.YES));
 			doc.add(new StringField("newsportal", "Spiegel", Field.Store.YES));
+			doc.add(new StringField("urlsource", "http://bit.ly/0815", Field.Store.YES));
+			doc.add(new StringField("urlpicture", "http://bit.ly/2.jpg", Field.Store.YES));
+			doc.add(new StringField("explanation", "Neue Wörter ...", Field.Store.YES));
 			writer.addDocument(doc);
 			
 			doc = new Document();
 
 			doc.add(new StringField("isNew", "1", Field.Store.YES));
-			doc.add(new StringField("topicHash", "hallo", Field.Store.YES));
-			doc.add(new IntField("date", 20001211, Field.Store.YES));
-			doc.add(new StringField("newsportal", "Welt", Field.Store.YES));
+			doc.add(new StringField("topichash", "gC73x8", Field.Store.YES));
+			doc.add(new StringField("title", "Überschwemmung in Peru", Field.Store.YES));
+			doc.add(new StringField("teaser", "Heute kam es in ...", Field.Store.YES));
+			doc.add(new IntField("date", 20001214, Field.Store.YES));
+			doc.add(new StringField("newsportal", "Spiegel", Field.Store.YES));
+			doc.add(new StringField("urlsource", "http://bit.ly/0815", Field.Store.YES));
+			doc.add(new StringField("urlpicture", "http://bit.ly/2.jpg", Field.Store.YES));
+			doc.add(new StringField("explanation", "Neue Wörter ...", Field.Store.YES));
 			writer.addDocument(doc);
 			
 			doc = new Document();
 
-			doc.add(new StringField("isNew", "0", Field.Store.YES));
-			doc.add(new StringField("topicHash", "hallo", Field.Store.YES));
-			doc.add(new IntField("date", 20001211, Field.Store.YES));
-			doc.add(new StringField("newsportal", "Welt", Field.Store.YES));
+			doc.add(new StringField("isNew", "1", Field.Store.YES));
+			doc.add(new StringField("topichash", "gC73x8", Field.Store.YES));
+			doc.add(new StringField("title", "Überschwemmung in Peru", Field.Store.YES));
+			doc.add(new StringField("teaser", "Heute kam es in ...", Field.Store.YES));
+			doc.add(new IntField("date", 20001212, Field.Store.YES));
+			doc.add(new StringField("newsportal", "Spiegel", Field.Store.YES));
+			doc.add(new StringField("urlsource", "http://bit.ly/0815", Field.Store.YES));
+			doc.add(new StringField("urlpicture", "http://bit.ly/2.jpg", Field.Store.YES));
+			doc.add(new StringField("explanation", "Neue Wörter ...", Field.Store.YES));
 			writer.addDocument(doc);
 			
 			writer.close();

@@ -252,7 +252,7 @@ public class Search {
 		try {
 			List<Document> documents = new ArrayList<Document>();
 			ScoreDoc[] hits = null;
-			Sort sort = new Sort(new SortField("date", SortField.Type.STRING,
+			Sort sort = new Sort(new SortField("date", SortField.Type.INT,
 					true));
 			IndexSearcher searcher = getSearcher();
 
