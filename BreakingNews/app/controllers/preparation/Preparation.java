@@ -1,6 +1,9 @@
 package controllers.preparation;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 import models.Newsportal;
 
@@ -40,6 +43,7 @@ public class Preparation extends Controller {
 	 *         Beitr&auml;ge mit neuem Thema enth&auml;lt
 	 */
 	public static Result getNewTopics(String offsetS, String keyword) {
+		//Analysis.test();
 		int offset;
 		ObjectNode response = Json.newObject();
 		ObjectNode result = Json.newObject();
@@ -47,6 +51,8 @@ public class Preparation extends Controller {
 		ObjectNode article;
 		Document document;
 		List<Document> documents;
+		SimpleDateFormat sdfD = new SimpleDateFormat( "yyyyMMddHHmm" );
+		SimpleDateFormat sdfS = new SimpleDateFormat( "dd. MMMM yyyy HH:mm",Locale.GERMAN);
 
 		try {
 			offset = Integer.parseInt(offsetS);
@@ -55,13 +61,17 @@ public class Preparation extends Controller {
 		}
 
 		documents = Search.getDocumentsNewTopic(offset, keyword);
-
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
-			article.put("art_date", document.get("date"));
+			try {
+				article.put("art_date", sdfS.format(sdfD.parse(document.get("date"))) + " Uhr");
+			} catch (ParseException e) {
+				article.put("art_date", "00.00.0000 00:00 Uhr");
+				e.printStackTrace();
+			}
 			article.put("art_urlsource", document.get("urlsource"));
 			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
@@ -137,7 +147,6 @@ public class Preparation extends Controller {
 		Document document;
 		ObjectNode article;
 		List<Document> documents = Search.getSimilarDocuments(topicHash);
-
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
