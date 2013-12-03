@@ -57,10 +57,10 @@ header, nav, section, article, aside, footer {
 
 h1 {
     text-indent: -9999px;
-    background: @routes.Assets.at(images/logo_klein2.png) no-repeat;
+    background: url(../images/logoneu.png) no-repeat;
     width: 1024px;
     height: 150px;
-    position: absolute;
+    position: relative;
     top: 0px;
     left: -300px;
 }
@@ -81,7 +81,7 @@ div {
         height: 100px;
         top:10px;
         right: -163px;
-        background: @routes.Assets.at(images/headerEB.png);
+        background: url(../images/headerEB.png);
         z-index: 2;
     }
 
@@ -95,13 +95,13 @@ div {
         margin: 0 auto ;
         width: 1024px;
         height: 2000px;
-        background: @routes.Assets.at(images/wrapper.png);
+        background: url(../images/wrapper.png);
         z-index: 1;
     }
 
 
 body {
-    background: @routes.Assets.at(images/bg_hgrau2.jpg) top center no-repeat fixed;
+    background: url(../images/bg_hgrau2.jpg) top center no-repeat fixed;
 }
 
 header.site, section, footer.site {
