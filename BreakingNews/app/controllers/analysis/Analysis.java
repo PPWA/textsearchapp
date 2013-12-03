@@ -45,6 +45,10 @@ public class Analysis {
 
 	public void addNewDocument(String title, Date publicationDate,
 			String urlsource, String urlpicture, String text, String newsPortal) {
+		
+		
+		
+		
 		Document doc = new Document();
 		try {
 			doc.add(new StringField("isNew", "1", Field.Store.YES));
@@ -58,6 +62,15 @@ public class Analysis {
 		}
 	}
 	
+	
+	
+	
+	
+	
+	
+	
+	
+	/*
 	public static void test(){
 		try {
 			dir = FSDirectory.open(new File("index"));
@@ -330,5 +343,5 @@ public class Analysis {
 			writer.close();
 		} catch (Exception e) {
 		}
-	}
+	}*/
 }
