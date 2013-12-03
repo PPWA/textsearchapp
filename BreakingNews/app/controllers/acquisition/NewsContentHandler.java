@@ -1,6 +1,9 @@
 package controllers.acquisition;
 
-import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
@@ -40,9 +43,9 @@ public class NewsContentHandler implements ContentHandler {
 		    case '\\':
 		    	buf.append("\\\\");
 		    	break;
-		    case '"':
-				buf.append("\\\"");
-				break;
+//		    case '"':
+//				buf.append("\\\"");
+//				break;
 		    case '\n':
 //		    	buf.append("\\n");
 		    	buf.append(" ");
@@ -109,13 +112,12 @@ public class NewsContentHandler implements ContentHandler {
 	
 	@Override
 	public void endDocument() throws SAXException {
-		System.out.println("Portal: "+newsPortal+"\nTitel: "+title+"\nDatum: "+publicationDate+"\nSrc: "+urlSource+"\nPic: "+urlPicture+"\nText: "+textBuf.toString());
 		isEndOfDocument = true;
 	}
 	
 	
 	public String getXMLString() {
-		return ("Portal: "+newsPortal+"\nTitel: "+title+"\nDatum: "+publicationDate+"\nSrc: "+urlSource+"\nPic: "+urlPicture+"\n\nText: "+textBuf.toString());
+		return ("Portal: "+newsPortal+"\nTitel: "+title+"\nDatum: "+getPublicationDate().toString()+"\nSrc: "+urlSource+"\nPic: "+urlPicture+"\n\nText: "+textBuf.toString());
 	}
 	
 	public boolean hasStoppedReading() {
@@ -130,8 +132,23 @@ public class NewsContentHandler implements ContentHandler {
 		return title;
 	}
 
-	public String getPublicationDate() {
-		return publicationDate;
+	public Date getPublicationDate() {
+		Date pubDate;
+		try {
+			// example: Sun, 06 Oct 2013 20:58:57 +0200
+			pubDate = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH).parse(publicationDate);
+		} catch (ParseException e) {
+			System.out.println("NewsContentHandler.java: Could not parse date ("+publicationDate+")");
+			try {
+				// example: Sun, 06 Oct 2013 20:58:57 GMT
+				pubDate = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH).parse(publicationDate);
+				System.out.println("NewsContentHandler.java: Next try parsing date succeeded.");
+			} catch (ParseException e1) {
+				System.out.println("NewsContentHandler.java: Could not parse date, again! Using current date.");
+				pubDate = new Date();
+			}
+		}
+		return pubDate;
 	}
 
 	public String getUrlSource() {
