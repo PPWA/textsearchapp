@@ -13,7 +13,10 @@ import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import controllers.analysis.Analysis;
+import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.Results;
 
@@ -30,13 +33,15 @@ public class Acquisition {
 	}
 	
 	public static Result startSearch() {
+		ObjectNode response = Json.newObject();
+		int articleCount = 0;
 		ArrayList<String> newXMLFiles = searchNewXMLFiles(DIR);
+		
 		if(newXMLFiles.isEmpty()) {
 			System.out.println("\nAcquisition.java: No new XML files found.");
-			return Results.noContent();
 		} else {
 			analysis = new Analysis();
-			StringBuffer buf = new StringBuffer();
+//			StringBuffer buf = new StringBuffer();
 			
 			for(int i=0; i<newXMLFiles.size(); i++) {
 				handl = new NewsContentHandler();
@@ -58,27 +63,30 @@ public class Acquisition {
 						handl.getUrlPicture(),
 						handl.getText(),
 						handl.getNewsPortal());
-				buf.append(handl.getXMLString()+"\n\n-----------------------------------------------\n\n\n");
+				
+				articleCount++;
+				deleteFile(DIR+newXMLFiles.get(i));
+//				buf.append(handl.getXMLString()+"\n\n-----------------------------------------------\n\n\n");
 			}
-
-			return Results.ok(buf.toString());
+//			System.out.println(buf.toString());
+//			return Results.ok(buf.toString());
 		}
+		response.put("new_art_count", articleCount);
+		return Results.ok(response);
 	}
 	
-/*	public static void startSearchTEST() {
-		handl = new NewsContentHandler();
-		readXMLFile("RSS1916018878.xml", handl);
-		while(!handl.hasStoppedReading()) {
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-		System.out.println("Getting back result!");
-	} */
-	
 	private static ArrayList<String> searchNewXMLFiles(String directory) {
+		ArrayList<String> newXMLFiles = new ArrayList<String>();
+		
+		File file = new File(directory);
+		String[] xmlFiles = file.list();
+		for(int i=0; i<xmlFiles.length; i++) {			
+			newXMLFiles.add(xmlFiles[i]);
+		}
+		return newXMLFiles;
+	}
+	
+	private static ArrayList<String> searchXMLFilesNewerThanPath(String directory) {
 		ArrayList<String> newXMLFiles = new ArrayList<String>();
 		
 		File file = new File(directory);
@@ -121,5 +129,14 @@ public class Acquisition {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private static boolean deleteFile(String pathToFile) {
+		File tempFile = new File(pathToFile);
+		boolean deleteSuccess = tempFile.delete();
+		if(deleteSuccess) System.out.println("Acquisition.java: Successfully deleted "+pathToFile);
+		else System.out.println("Acquisition.java: Failed to delete "+pathToFile);
+		
+		return deleteSuccess;
 	}
 }
