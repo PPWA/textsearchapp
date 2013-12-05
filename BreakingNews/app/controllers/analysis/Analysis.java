@@ -32,6 +32,7 @@ import controllers.preparation.Search;
 public class Analysis {
 
 	private static Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
+	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
 
 	public static IndexWriter getWriter() throws Exception {
 		Directory dir = FSDirectory.open(new File(Search.indexPath));
@@ -42,19 +43,17 @@ public class Analysis {
 	}
 
 	public static void addNewDocument(String title, Date publicationDate,
-			String urlsource, String urlpicture, String text, String newsPortal) {
+			String urlsource, String urlpicture, String text, String teaser, String newsPortal) {
 		String oldTopicHash = "";
 		int i = 1;
 		String isNew = "1";
 		String topicHash = "";
-		DateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
 		long date = Long.parseLong(df.format(publicationDate));
 		int l = 0;
 		int count = 0;
 		IndexReader reader;
 		IndexSearcher searcher;
 		Query q;
-		StandardAnalyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
 		byte[] bytesOfMessage;
 		byte[] theDigest;
 		boolean b = true;
@@ -103,6 +102,7 @@ public class Analysis {
 					q = new QueryParser(Version.LUCENE_46, "topichash",
 							analyzer).parse(topicHash);
 					count = searcher.search(q, 1).totalHits;
+
 					if (count > 0) {
 						l++;
 					} else {
@@ -120,9 +120,16 @@ public class Analysis {
 
 		Document doc = new Document();
 		try {
+			//TODO Bessere Indexierung (+ generelles Verständnis), vor allem Volltext
+			//TODO Explanation?
+			//TODO Funktioniert das auch so? Andere Klassensturktur für Methoden
+			//TODO JavaDoc
+			//TODO 4 Funktionen implementieren
+			//TODO systems.out.printlns für Systemprozesse einfügen
 			doc.add(new StringField("isNew", isNew, Field.Store.YES));
 			doc.add(new StringField("topichash", topicHash, Field.Store.YES));
 			doc.add(new StringField("title", title, Field.Store.YES));
+			doc.add(new TextField("teaser", teaser, Field.Store.YES));
 			doc.add(new TextField("text", text, Field.Store.YES));
 			doc.add(new LongField("date", date, Field.Store.YES));
 			doc.add(new StringField("newsportal", newsPortal, Field.Store.YES));

@@ -67,7 +67,7 @@ public class Preparation extends Controller {
 	 *         Beitr&auml;ge mit neuem Thema enth&auml;lt
 	 */
 	public static Result getNewTopics(String offsetS, String keyword) {
-		Analysis.addNewDocument("titel", new Date(), "bla", "bla", "bla", "bla");
+		//Analysis.addNewDocument("titel", new Date(), "bla", "bla", "bla", "bla");
 		int offset;
 		ObjectNode response = Json.newObject();
 		ObjectNode result = Json.newObject();
