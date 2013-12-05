@@ -38,6 +38,8 @@ public class NewsContentHandler implements ContentHandler {
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
 		StringBuffer buf = new StringBuffer();
+		boolean isCleaning = false;
+		
 		for (int i = start; i < start + length; i++) {
 		    switch (ch[i]) {
 		    case '\\':
@@ -117,7 +119,7 @@ public class NewsContentHandler implements ContentHandler {
 	
 	
 	public String getXMLString() {
-		return ("Portal: "+newsPortal+"\nTitel: "+title+"\nDatum: "+getPublicationDate().toString()+"\nSrc: "+urlSource+"\nPic: "+urlPicture+"\n\nText: "+textBuf.toString());
+		return ("Portal: "+getNewsPortal()+"\nTitel: "+getTitle()+"\nDatum: "+getPublicationDate().toString()+"\nTeaser: "+getTeaser()+"\nSrc: "+getUrlSource()+"\nPic: "+getUrlPicture()+"\n\nText: "+getText());
 	}
 	
 	public boolean hasStoppedReading() {
@@ -130,6 +132,10 @@ public class NewsContentHandler implements ContentHandler {
 
 	public String getTitle() {
 		return title;
+	}
+
+	public String getTeaser() {
+		return getText().substring(0, 230)+"...";
 	}
 
 	public Date getPublicationDate() {

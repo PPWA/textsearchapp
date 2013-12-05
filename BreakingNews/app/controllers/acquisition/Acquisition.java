@@ -34,15 +34,13 @@ public class Acquisition {
 	
 	public static Result startSearch() {
 		ObjectNode response = Json.newObject();
+//		StringBuffer buf = new StringBuffer(); // for testing
 		int articleCount = 0;
 		ArrayList<String> newXMLFiles = searchNewXMLFiles(DIR);
 		
 		if(newXMLFiles.isEmpty()) {
 			System.out.println("\nAcquisition.java: No new XML files found.");
-		} else {
-			analysis = new Analysis();
-//			StringBuffer buf = new StringBuffer();
-			
+		} else {		
 			for(int i=0; i<newXMLFiles.size(); i++) {
 				handl = new NewsContentHandler();
 				
@@ -56,23 +54,24 @@ public class Acquisition {
 					}
 				}
 				
-				analysis.addNewDocument(
+				Analysis.addNewDocument(
 						handl.getTitle(),
 						handl.getPublicationDate(),
 						handl.getUrlSource(),
 						handl.getUrlPicture(),
 						handl.getText(),
-						handl.getNewsPortal());
+						handl.getTeaser(),
+						handl.getNewsPortal()); 
 				
 				articleCount++;
 				deleteFile(DIR+newXMLFiles.get(i));
 //				buf.append(handl.getXMLString()+"\n\n-----------------------------------------------\n\n\n");
 			}
 //			System.out.println(buf.toString());
-//			return Results.ok(buf.toString());
 		}
 		response.put("new_art_count", articleCount);
 		return Results.ok(response);
+//		return Results.ok(buf.toString());	// for testing
 	}
 	
 	private static ArrayList<String> searchNewXMLFiles(String directory) {
