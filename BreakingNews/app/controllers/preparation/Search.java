@@ -58,11 +58,11 @@ public class Search {
 	/**
 	 * Suchbegriff zur Ermittelung von Artikeln mit neuen Themen
 	 */
-	private final static String NEWTOPICQUERY = "1";
+	public final static String NEWTOPICQUERY = "1";
 	/**
 	 * Suchbegriff zur Ermittelung von Artikeln mit bereits bekannten Themen
 	 */
-	private final static String OLDTOPICQUERY = "0";
+	public final static String OLDTOPICQUERY = "0";
 	/**
 	 * Anzahl der zu ermittelnden Suchergebnisse, wenn Liste mit Listenbeginn
 	 * startet
@@ -71,7 +71,7 @@ public class Search {
 	/**
 	 * Indentifier f&uuml;r den Index auf der Festplatte
 	 */
-	private static String indexPath = "index2";
+	public static String indexPath = "index2";
 	/**
 	 * Gibt in ganzen Tagen an, wie weit bei Suchanfragen in die Vergangenheit
 	 * zur&uuml;ckgeschaut werden soll
@@ -215,7 +215,7 @@ public class Search {
 					true));
 			ScoreDoc[] hits = null;
 			IndexSearcher searcher = getSearcher();
-
+			
 			// Erstellung der Suchanfrage
 			BooleanQuery booleanQuery = new BooleanQuery();
 			Query query1 = new TermQuery(new Term("isNew", NEWTOPICQUERY));
@@ -231,6 +231,7 @@ public class Search {
 				Document d = searcher.doc(docId);
 				documents.add(d);
 			}
+			reader.close();
 			return documents;
 		} catch (Exception e) {
 			return new ArrayList<Document>();
@@ -257,6 +258,7 @@ public class Search {
 			Sort sort = new Sort(new SortField("date", SortField.Type.LONG,
 					true));
 			IndexSearcher searcher = getSearcher();
+
 			// Erstellung der Suchanfrage
 			BooleanQuery booleanQuery = new BooleanQuery();
 			Query query1 = new TermQuery(new Term(queryfield, querystr));
@@ -303,6 +305,7 @@ public class Search {
 			}
 			return documents;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return new ArrayList<Document>();
 		}
 	}

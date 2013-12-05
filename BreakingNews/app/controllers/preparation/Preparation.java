@@ -2,6 +2,7 @@ package controllers.preparation;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -29,9 +30,32 @@ import controllers.analysis.Analysis;
 public class Preparation extends Controller {
 
 	/**
-	 * Pr&uuml;ft die GET-Parameter der aufgerufenen URL auf Plausibilit&auml;t, fragt die
-	 * Klasse Search nach Artikeln mit neuen Themen ab und erzeugt aus deren
-	 * Meta-Daten einen JSON-String.
+	 * Verwendetes Datumfsformat in Lucene
+	 */
+	private static SimpleDateFormat sdfD = new SimpleDateFormat("yyyyMMddHHmm");
+	/**
+	 * Verwendetes Datumfsformat in JSON und Frontend
+	 */
+	private static SimpleDateFormat sdfS = new SimpleDateFormat("dd. MMMM yyyy HH:mm", Locale.GERMAN);
+
+	/**
+	 * Wandelt das Datum wie es im Lucene-Index gespeichert ist in ein Format um, welches in JSON und damit im Frontend angezeigt wird.
+	 * 
+	 * @param LDate Umzuwandelndes Datum in Lucene-Schreibweise
+	 * @return Das Publikationsdatum im Format DD. MMMM YYYY HH:mm.
+	 */
+	public static String LDateToJSDate(String LDate) {
+		try {
+			return sdfS.format(sdfD.parse(LDate)) + " Uhr";
+		} catch (ParseException e) {
+			return "00.00.0000 00:00 Uhr";
+		}
+	}
+
+	/**
+	 * Pr&uuml;ft die GET-Parameter der aufgerufenen URL auf Plausibilit&auml;t,
+	 * fragt die Klasse Search nach Artikeln mit neuen Themen ab und erzeugt aus
+	 * deren Meta-Daten einen JSON-String.
 	 * 
 	 * @param offsetS
 	 *            Flag, ob Liste neu beginnen oder an letzter Stelle fortgesetzt
@@ -43,7 +67,7 @@ public class Preparation extends Controller {
 	 *         Beitr&auml;ge mit neuem Thema enth&auml;lt
 	 */
 	public static Result getNewTopics(String offsetS, String keyword) {
-		//Analysis.test();
+		Analysis.addNewDocument("titel", new Date(), "bla", "bla", "bla", "bla");
 		int offset;
 		ObjectNode response = Json.newObject();
 		ObjectNode result = Json.newObject();
@@ -51,8 +75,6 @@ public class Preparation extends Controller {
 		ObjectNode article;
 		Document document;
 		List<Document> documents;
-		SimpleDateFormat sdfD = new SimpleDateFormat( "yyyyMMddHHmm" );
-		SimpleDateFormat sdfS = new SimpleDateFormat( "dd. MMMM yyyy HH:mm",Locale.GERMAN);
 
 		try {
 			offset = Integer.parseInt(offsetS);
@@ -66,12 +88,7 @@ public class Preparation extends Controller {
 			document = documents.get(i);
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
-			try {
-				article.put("art_date", sdfS.format(sdfD.parse(document.get("date"))) + " Uhr");
-			} catch (ParseException e) {
-				article.put("art_date", "00.00.0000 00:00 Uhr");
-				e.printStackTrace();
-			}
+			article.put("art_date", LDateToJSDate(document.get("date")));
 			article.put("art_urlsource", document.get("urlsource"));
 			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
@@ -84,9 +101,9 @@ public class Preparation extends Controller {
 	}
 
 	/**
-	 * Pr&uuml;ft die GET-Parameter der aufgerufenen URL auf Plausibilit&auml;t, fragt die
-	 * Klasse Search nach Artikeln mit bereits bekannten Themen ab und erzeugt
-	 * aus deren Meta-Daten einen JSON-String.
+	 * Pr&uuml;ft die GET-Parameter der aufgerufenen URL auf Plausibilit&auml;t,
+	 * fragt die Klasse Search nach Artikeln mit bereits bekannten Themen ab und
+	 * erzeugt aus deren Meta-Daten einen JSON-String.
 	 * 
 	 * @param offsetS
 	 *            Flag, ob Liste neu beginnen oder an letzter Stelle fortgesetzt
@@ -119,7 +136,7 @@ public class Preparation extends Controller {
 			document = documents.get(i);
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
-			article.put("art_date", document.get("date"));
+			article.put("art_date", LDateToJSDate(document.get("date")));
 			article.put("art_urlsource", document.get("urlsource"));
 			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
@@ -152,7 +169,7 @@ public class Preparation extends Controller {
 			document = documents.get(i);
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
-			article.put("art_date", document.get("date"));
+			article.put("art_date", LDateToJSDate(document.get("date")));
 			article.put("art_urlsource", document.get("urlsource"));
 			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
@@ -164,7 +181,8 @@ public class Preparation extends Controller {
 	}
 
 	/**
-	 * Fragt die Klasse Search nach allen Newsportalen und die Anzahl der von ihnen jeweils publizierten Artikel mit neuen Themen ab.
+	 * Fragt die Klasse Search nach allen Newsportalen und die Anzahl der von
+	 * ihnen jeweils publizierten Artikel mit neuen Themen ab.
 	 * 
 	 * @return Eine HTTP-Response mit Status-Code 200, MIMETYPE text/json und
 	 *         einem JSON-String, der die Meta-Daten aller Newsportale und die
