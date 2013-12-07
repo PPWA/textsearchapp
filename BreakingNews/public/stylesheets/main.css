@@ -45,7 +45,7 @@ dt {
         float: left;
         margin: 0 auto ;
         width: 1024px;
-        height: 2000px;
+        height: auto;
         background: url(../images/wrapper.png);
     }
 
@@ -118,17 +118,17 @@ ul.nav {
     background: -moz-linear-gradient( center top, #0f0f98 5%, #362a2a 100% );
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#0f0f98', endColorstr='#362a2a');
     background-color: #0f0f98;
-    -webkit-border-top-left-radius: 15px;
-    -moz-border-radius-topleft: 15px;
+    /*-webkit-border-top-left-radius: 15px;
+    -moz-border-radius-topleft: 15px;*/
     border-top-left-radius: 15px;
-    -webkit-border-top-right-radius: 15px;
-    -moz-border-radius-topright: 15px;
+    /*-webkit-border-top-right-radius: 15px;
+    -moz-border-radius-topright: 15px;*/
     border-top-right-radius: 15px;
-    -webkit-border-bottom-right-radius: 0px;
-    -moz-border-radius-bottomright: 0px;
+    /*-webkit-border-bottom-right-radius: 0px;
+    -moz-border-radius-bottomright: 0px;*/
     border-bottom-right-radius: 0px;
-    -webkit-border-bottom-left-radius: 0px;
-    -moz-border-radius-bottomleft: 0px;
+    /*-webkit-border-bottom-left-radius: 0px;
+    -moz-border-radius-bottomleft: 0px;*/
     border-bottom-left-radius: 0px;
     text-indent: 0;
     border: 1px solid #469df5;

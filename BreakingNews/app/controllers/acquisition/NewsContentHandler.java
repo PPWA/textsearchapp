@@ -1,12 +1,21 @@
 package controllers.acquisition;
 
-import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.ContentHandler;
 import org.xml.sax.Locator;
 import org.xml.sax.SAXException;
 
+/**
+ * Liest eine &uuml;bergebene XML-Datei mittels SAX-Parser ein
+ * und speichert die vorgegebenen extrahierten Werte.
+ * @author Christian Ochsenk&uuml;hn
+ * @version 1.0
+ */
 public class NewsContentHandler implements ContentHandler {
 	
 	private String currentValue;
@@ -32,17 +41,22 @@ public class NewsContentHandler implements ContentHandler {
 		textBuf = new StringBuffer();
 	}
 
+	/**
+	 * Wird vom SAX-Parser selbst aufgerufen. Maskiert einige Sonderzeichen.
+	 * Speichert die aktuell ausgelesenen Daten in der Variable currentValue.
+	 */
 	@Override
 	public void characters(char[] ch, int start, int length) throws SAXException {
 		StringBuffer buf = new StringBuffer();
+		
 		for (int i = start; i < start + length; i++) {
 		    switch (ch[i]) {
 		    case '\\':
 		    	buf.append("\\\\");
 		    	break;
-		    case '"':
-				buf.append("\\\"");
-				break;
+//		    case '"':
+//				buf.append("\\\"");
+//				break;
 		    case '\n':
 //		    	buf.append("\\n");
 		    	buf.append(" ");
@@ -58,14 +72,15 @@ public class NewsContentHandler implements ContentHandler {
 				break;
 		    }
 		}
-		
-//		currentValue = new String(ch, start, length);
 		currentValue = buf.toString();
 		
 		if(isExtractedText)
 			textBuf.append(buf);
 	}
 
+	/**
+	 * Wird automatisch aufgerufen, wenn beim Parsen ein &ouml;ffnendes XML-Element auftaucht.
+	 */
 	@Override
 	public void startElement(String uri, String localName, String qName,
 			Attributes attr) throws SAXException {
@@ -81,6 +96,10 @@ public class NewsContentHandler implements ContentHandler {
 		}
 	}
 
+	/**
+	 * Wird automatisch aufgerufen, wenn beim Parsen ein schlie&szlig;endes XML-Element auftaucht.
+	 * Speichert die zuvor gelesenen Inhalte jenes Elements in der passenden Variable.
+	 */
 	@Override
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
@@ -99,7 +118,7 @@ public class NewsContentHandler implements ContentHandler {
 			publicationDate = currentValue;
 		}
 //		if (localName.equals("guid") && isInItem) {
-		if (localName.equals("link") && isInItem) {
+		if (localName.equals("link") && isInItem) {	
 			urlSource = currentValue;
 		}
 		if (localName.equals("ExtractedText") && isInItem) {
@@ -107,41 +126,97 @@ public class NewsContentHandler implements ContentHandler {
 		} 
 	}
 	
+	/**
+	 * Wird automatisch aufgerufen, wenn der Parser das Ende der XML-Datei erreicht hat.
+	 */
 	@Override
 	public void endDocument() throws SAXException {
-		System.out.println("Portal: "+newsPortal+"\nTitel: "+title+"\nDatum: "+publicationDate+"\nSrc: "+urlSource+"\nPic: "+urlPicture+"\nText: "+textBuf.toString());
 		isEndOfDocument = true;
 	}
 	
-	
+	/**
+	 * Gibt alle gespeicherten Daten der XML-Datei als formattierten String zur&uuml;ck.
+	 * @return Alle gespeicherten Daten der XML-Datei
+	 */
 	public String getXMLString() {
-		return ("Portal: "+newsPortal+"\nTitel: "+title+"\nDatum: "+publicationDate+"\nSrc: "+urlSource+"\nPic: "+urlPicture+"\n\nText: "+textBuf.toString());
+		return ("Portal: "+getNewsPortal()+"\nTitel: "+getTitle()+"\nDatum: "+getPublicationDate().toString()+"\nTeaser: "+getTeaser()+"\nSrc: "+getUrlSource()+"\nPic: "+getUrlPicture()+"\n\nText: "+getText());
 	}
 	
+	/**
+	 * Zeigt an, ob der Handler mit dem Auslesen der XML-Datei fertig ist.
+	 * @return True, wenn fertig mit Auslesen der XML-Datei
+	 */
 	public boolean hasStoppedReading() {
 		return isEndOfDocument;
 	}
 	
+	/**
+	 * Gibt das ausgelesene Nachrichtenportal zur&uuml;ck.
+	 * @return	Nachrichtenportal
+	 */
 	public String getNewsPortal() {
 		return newsPortal;
 	}
 
+	/**
+	 * Gibt den ausgelesenen Titel des Artikels zur&uuml;ck.
+	 * @return Titel des Artikels
+	 */
 	public String getTitle() {
 		return title;
 	}
 
-	public String getPublicationDate() {
-		return publicationDate;
+	/**
+	 * Gibt die ersten 230 Zeichen des extrahierten Texts als Teaser zur&uuml;ck.
+	 * @return 230 Zeichen langer Artikel-Teaser
+	 */
+	public String getTeaser() {
+		return getText().substring(0, 230)+"...";
 	}
 
+	/**
+	 * Wandelt Datum aus der XML-Datei in Java Date Objekt um und gibt es zur&uuml;ck.
+	 * @return Ver&ouml;ffentlichungsdatum des Artikels der XML-Datei
+	 */
+	public Date getPublicationDate() {
+		Date pubDate;
+		try {
+			// example: Sun, 06 Oct 2013 20:58:57 +0200
+			pubDate = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.ENGLISH).parse(publicationDate);
+		} catch (ParseException e) {
+			System.out.println("NewsContentHandler.java: Could not parse date ("+publicationDate+")");
+			try {
+				// example: Sun, 06 Oct 2013 20:58:57 GMT
+				pubDate = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH).parse(publicationDate);
+				System.out.println("NewsContentHandler.java: Next try parsing date succeeded.");
+			} catch (ParseException e1) {
+				System.out.println("NewsContentHandler.java: Could not parse date, again! Using current date.");
+				pubDate = new Date();
+			}
+		}
+		return pubDate;
+	}
+
+	/**
+	 * Gibt die URL des urspr&uuml;nglichen Artikels zur&uuml;ck.
+	 * @return URL des Artikels
+	 */
 	public String getUrlSource() {
 		return urlSource;
 	}
 
+	/**
+	 * Gibt - wenn vorhanden - die URL des Artikel-Bildes zur&uuml;ck.
+	 * @return URL des Artikel-Bilds
+	 */
 	public String getUrlPicture() {
 		return urlPicture;
 	}
 
+	/**
+	 * Gibt den Nachrichtentext des Artikels zur&uuml;ck.
+	 * @return Nachrichtentext des Artikels
+	 */
 	public String getText() {
 		return textBuf.toString();
 	}
@@ -151,12 +226,10 @@ public class NewsContentHandler implements ContentHandler {
 	public void endPrefixMapping(String arg0) throws SAXException { }
 
 	@Override
-	public void ignorableWhitespace(char[] arg0, int arg1, int arg2)
-			throws SAXException { }
+	public void ignorableWhitespace(char[] arg0, int arg1, int arg2) throws SAXException { }
 
 	@Override
-	public void processingInstruction(String arg0, String arg1)
-			throws SAXException { }
+	public void processingInstruction(String arg0, String arg1) throws SAXException { }
 
 	@Override
 	public void setDocumentLocator(Locator arg0) { }
@@ -168,7 +241,6 @@ public class NewsContentHandler implements ContentHandler {
 	public void startDocument() throws SAXException { }
 
 	@Override
-	public void startPrefixMapping(String arg0, String arg1)
-			throws SAXException { }
+	public void startPrefixMapping(String arg0, String arg1) throws SAXException { }
 
 }

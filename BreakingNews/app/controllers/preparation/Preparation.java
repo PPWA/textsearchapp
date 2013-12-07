@@ -1,6 +1,10 @@
 package controllers.preparation;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import models.Newsportal;
 
@@ -26,9 +30,32 @@ import controllers.analysis.Analysis;
 public class Preparation extends Controller {
 
 	/**
-	 * Pr&uuml;ft die GET-Parameter der aufgerufenen URL auf Plausibilit&auml;t, fragt die
-	 * Klasse Search nach Artikeln mit neuen Themen ab und erzeugt aus deren
-	 * Meta-Daten einen JSON-String.
+	 * Verwendetes Datumfsformat in Lucene
+	 */
+	private static SimpleDateFormat sdfD = new SimpleDateFormat("yyyyMMddHHmm");
+	/**
+	 * Verwendetes Datumfsformat in JSON und Frontend
+	 */
+	private static SimpleDateFormat sdfS = new SimpleDateFormat("dd. MMMM yyyy HH:mm", Locale.GERMAN);
+
+	/**
+	 * Wandelt das Datum wie es im Lucene-Index gespeichert ist in ein Format um, welches in JSON und damit im Frontend angezeigt wird.
+	 * 
+	 * @param LDate Umzuwandelndes Datum in Lucene-Schreibweise
+	 * @return Das Publikationsdatum im Format DD. MMMM YYYY HH:mm.
+	 */
+	public static String LDateToJSDate(String LDate) {
+		try {
+			return sdfS.format(sdfD.parse(LDate)) + " Uhr";
+		} catch (ParseException e) {
+			return "00.00.0000 00:00 Uhr";
+		}
+	}
+
+	/**
+	 * Pr&uuml;ft die GET-Parameter der aufgerufenen URL auf Plausibilit&auml;t,
+	 * fragt die Klasse Search nach Artikeln mit neuen Themen ab und erzeugt aus
+	 * deren Meta-Daten einen JSON-String.
 	 * 
 	 * @param offsetS
 	 *            Flag, ob Liste neu beginnen oder an letzter Stelle fortgesetzt
@@ -41,6 +68,8 @@ public class Preparation extends Controller {
 	 */
 	public static Result getNewTopics(String offsetS, String keyword) {
 		//Analysis.test();
+
+		//Analysis.addNewDocument("titel", new Date(), "bla", "bla", "bla", "bla");
 		int offset;
 		ObjectNode response = Json.newObject();
 		ObjectNode result = Json.newObject();
@@ -56,19 +85,16 @@ public class Preparation extends Controller {
 		}
 
 		documents = Search.getDocumentsNewTopic(offset, keyword);
-
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
-			article.put("isNew", document.get("isNew"));
-			article.put("art_id", document.get("id"));
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
-			article.put("art_date", document.get("date"));
+			article.put("art_date", LDateToJSDate(document.get("date")));
 			article.put("art_urlsource", document.get("urlsource"));
-			article.put("art_picture", document.get("picture"));
+			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
-			article.put("art_topicHash", document.get("topicHash"));
+			article.put("art_topichash", document.get("topichash"));
 			article.put("art_explanation", document.get("explanation"));
 			articles.add(article);
 		}
@@ -77,9 +103,9 @@ public class Preparation extends Controller {
 	}
 
 	/**
-	 * Pr&uuml;ft die GET-Parameter der aufgerufenen URL auf Plausibilit&auml;t, fragt die
-	 * Klasse Search nach Artikeln mit bereits bekannten Themen ab und erzeugt
-	 * aus deren Meta-Daten einen JSON-String.
+	 * Pr&uuml;ft die GET-Parameter der aufgerufenen URL auf Plausibilit&auml;t,
+	 * fragt die Klasse Search nach Artikeln mit bereits bekannten Themen ab und
+	 * erzeugt aus deren Meta-Daten einen JSON-String.
 	 * 
 	 * @param offsetS
 	 *            Flag, ob Liste neu beginnen oder an letzter Stelle fortgesetzt
@@ -110,15 +136,13 @@ public class Preparation extends Controller {
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
-			article.put("isNew", document.get("isNew"));
-			article.put("art_id", document.get("id"));
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
-			article.put("art_date", document.get("date"));
+			article.put("art_date", LDateToJSDate(document.get("date")));
 			article.put("art_urlsource", document.get("urlsource"));
-			article.put("art_picture", document.get("picture"));
+			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
-			article.put("art_topicHash", document.get("topicHash"));
+			article.put("art_topichash", document.get("topichash"));
 			articles.add(article);
 		}
 		response.put("articles", articles);
@@ -142,18 +166,16 @@ public class Preparation extends Controller {
 		Document document;
 		ObjectNode article;
 		List<Document> documents = Search.getSimilarDocuments(topicHash);
-
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
-			article.put("art_id", document.get("id"));
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
-			article.put("art_date", document.get("date"));
+			article.put("art_date", LDateToJSDate(document.get("date")));
 			article.put("art_urlsource", document.get("urlsource"));
-			article.put("art_picture", document.get("picture"));
+			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
-			article.put("art_topichash", document.get("topicHash"));
+			article.put("art_topichash", document.get("topichash"));
 			articles.add(article);
 		}
 		response.put("articles", articles);
@@ -161,7 +183,8 @@ public class Preparation extends Controller {
 	}
 
 	/**
-	 * Fragt die Klasse Search nach allen Newsportalen und die Anzahl der von ihnen jeweils publizierten Artikel mit neuen Themen ab.
+	 * Fragt die Klasse Search nach allen Newsportalen und die Anzahl der von
+	 * ihnen jeweils publizierten Artikel mit neuen Themen ab.
 	 * 
 	 * @return Eine HTTP-Response mit Status-Code 200, MIMETYPE text/json und
 	 *         einem JSON-String, der die Meta-Daten aller Newsportale und die

@@ -7,7 +7,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+
 import models.Newsportal;
+
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -56,11 +58,11 @@ public class Search {
 	/**
 	 * Suchbegriff zur Ermittelung von Artikeln mit neuen Themen
 	 */
-	private final static String NEWTOPICQUERY = "1";
+	public final static String NEWTOPICQUERY = "1";
 	/**
 	 * Suchbegriff zur Ermittelung von Artikeln mit bereits bekannten Themen
 	 */
-	private final static String OLDTOPICQUERY = "2";
+	public final static String OLDTOPICQUERY = "0";
 	/**
 	 * Anzahl der zu ermittelnden Suchergebnisse, wenn Liste mit Listenbeginn
 	 * startet
@@ -69,12 +71,12 @@ public class Search {
 	/**
 	 * Indentifier f&uuml;r den Index auf der Festplatte
 	 */
-	private static String indexPath = "index";
+	public static String indexPath = "index2";
 	/**
 	 * Gibt in ganzen Tagen an, wie weit bei Suchanfragen in die Vergangenheit
 	 * zur&uuml;ckgeschaut werden soll
 	 */
-	private static int timeframe = 20000;
+	private static int timeframe = 90;
 	/**
 	 * Globale Referenz auf den Reader f&uuml;r alle Suchanfragen.
 	 */
@@ -98,9 +100,9 @@ public class Search {
 	 * 
 	 * @return das aktuelle Datum als Integer
 	 */
-	public static int getUpperBound() {
-		DateFormat df = new SimpleDateFormat("yyyymmdd");
-		return Integer.parseInt(df.format(new Date()));
+	public static Long getUpperBound() {
+		DateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
+		return Long.parseLong(df.format(new Date()));
 	}
 
 	/**
@@ -109,12 +111,12 @@ public class Search {
 	 * 
 	 * @return Den Beginn des Suchzeitraumes
 	 */
-	public static int getLowerBound() {
+	public static long getLowerBound() {
 		Calendar c = Calendar.getInstance();
 		c.setTime(new Date());
 		c.add(Calendar.DAY_OF_MONTH, -timeframe);
-		DateFormat df = new SimpleDateFormat("yyyymmdd");
-		return Integer.parseInt(df.format(c.getTime()));
+		DateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
+		return Long.parseLong(df.format(c.getTime()));
 	}
 
 	/**
@@ -167,7 +169,7 @@ public class Search {
 	public static List<Document> getSimilarDocuments(String topicHash) {
 
 		String querystr = topicHash;
-		String queryfield = "topicHash";
+		String queryfield = "topichash";
 		return getResults(querystr, queryfield, 0, false, null, "", "");
 	}
 
@@ -213,11 +215,11 @@ public class Search {
 					true));
 			ScoreDoc[] hits = null;
 			IndexSearcher searcher = getSearcher();
-
+			
 			// Erstellung der Suchanfrage
 			BooleanQuery booleanQuery = new BooleanQuery();
 			Query query1 = new TermQuery(new Term("isNew", NEWTOPICQUERY));
-			Query query2 = NumericRangeQuery.newIntRange("date",
+			Query query2 = NumericRangeQuery.newLongRange("date",
 					getLowerBound(), getUpperBound(), true, true);
 			booleanQuery.add(query1, BooleanClause.Occur.MUST);
 			booleanQuery.add(query2, BooleanClause.Occur.MUST);
@@ -229,6 +231,7 @@ public class Search {
 				Document d = searcher.doc(docId);
 				documents.add(d);
 			}
+			reader.close();
 			return documents;
 		} catch (Exception e) {
 			return new ArrayList<Document>();
@@ -252,14 +255,14 @@ public class Search {
 		try {
 			List<Document> documents = new ArrayList<Document>();
 			ScoreDoc[] hits = null;
-			Sort sort = new Sort(new SortField("date", SortField.Type.STRING,
+			Sort sort = new Sort(new SortField("date", SortField.Type.LONG,
 					true));
 			IndexSearcher searcher = getSearcher();
 
 			// Erstellung der Suchanfrage
 			BooleanQuery booleanQuery = new BooleanQuery();
 			Query query1 = new TermQuery(new Term(queryfield, querystr));
-			Query query2 = NumericRangeQuery.newIntRange("date",
+			Query query2 = NumericRangeQuery.newLongRange("date",
 					getLowerBound(), getUpperBound(), true, true);
 			booleanQuery.add(query1, BooleanClause.Occur.MUST);
 			booleanQuery.add(query2, BooleanClause.Occur.MUST);
@@ -267,7 +270,6 @@ public class Search {
 				Query query3 = new TermQuery(new Term("text", keyword));
 				booleanQuery.add(query3, BooleanClause.Occur.MUST);
 			}
-
 			if (offset == 0) {
 				// Listenanfang
 				end = false;
@@ -280,9 +282,8 @@ public class Search {
 					hits = searcher.searchAfter(lastDoc, booleanQuery, 3, sort).scoreDocs;
 				}
 			}
-
 			// Caching des jeweils letzten Dokuments der Suchanfrage, damit
-			// searchAfter() ausgef&uuml;hrt werden kann
+			// searchAfter() ausgeführt werden kann
 			try {
 				lastDoc = hits[hits.length - 1];
 				for (int i = 0; i < hits.length; ++i) {
@@ -304,6 +305,7 @@ public class Search {
 			}
 			return documents;
 		} catch (Exception e) {
+			e.printStackTrace();
 			return new ArrayList<Document>();
 		}
 	}
