@@ -1,14 +1,20 @@
 package controllers.preparation;
 
 import java.util.List;
+
 import models.Newsportal;
+
 import org.apache.lucene.document.Document;
+
 import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
+
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import controllers.analysis.Analysis;
 
 /**
  * Erzeugt aus den von der Klasse Search erhaltenen Ergebnissen eine Ausgabe im
@@ -34,6 +40,7 @@ public class Preparation extends Controller {
 	 *         Beitr&auml;ge mit neuem Thema enth&auml;lt
 	 */
 	public static Result getNewTopics(String offsetS, String keyword) {
+		//Analysis.test();
 		int offset;
 		ObjectNode response = Json.newObject();
 		ObjectNode result = Json.newObject();

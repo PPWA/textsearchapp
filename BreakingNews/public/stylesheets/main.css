@@ -1,102 +1,52 @@
-/* globaler Reset */
-
-*, html, body, div, dl, dt, dd, ul, ol, li, h1, h2, h3, h5, h5, h6, pre, form, label, fieldset, input, p, blockquote, th, td {
-    margin: 0;
-    padding: 0;
-}
-
-table {
-    border-collapse: collapse;
-    border-spacing: 0;
-}
-
-fieldset, img {
-    border: 0;
-}
-
-address, caption, cite, code, dfn, em, strong, th, var {
-    font-style: normal;
-    font-weight: normal;
-}
-
-ol, ul, li {
-    list-style: none;
-}
-
-caption, th {
-    text-align: left;
-}
-
-h1, h2, h3, h5, h5, h6 {
-    font-size: 100%;
-    font-weight: normal;
-}
-
-q:before, q:after {
-    content: '';
-}
-
-/* globaler reset-RESET */
-/* Das Folgende restauriert ein paar sinnvolle Standards */
-strong {
-    font-weight: bold;
-}
-
-em {
-    font-style: italic;
-}
-
-
 /*Formatierung*/
 /*Layout*/
 
-header, nav, section, article, aside, footer {
+h1, h2, header, nav, section, article, aside, footer {
     display: block;
     overflow: hidden;
+    font-family: Arial;
 }
 
 h1 {
-    text-indent: -9999px;
-    background: url(../images/logoneu.png) no-repeat;
-    width: 1024px;
-    height: 150px;
-    position: relative;
-    top: 0px;
-    left: -300px;
+    float: left;
+    font-size: 20px;
 }
 
 h2 {
-    text-indent: -9999px;
-    position: absolute;
-    left: -300px;
+    float: left;
+    font-size: 15px;
 }
 
 
-div {
-    position: relative;
-}
-
-    div.header {
-        width: 1024px;
-        height: 100px;
-        top:10px;
-        right: -163px;
-        background: url(../images/headerEB.png);
-        z-index: 2;
+dt {
+      font-weight: bold;
+      float: left;
+      width: 5em;
+      margin-left: 1em;
+      clear: left;
     }
 
-        div.header div {
-            margin: 0 auto;
-            width: 650px;
-        }
+#output{
+    border: 5px solid rgb(30, 182, 0);
+}
 
-    div.wrapper {
-        top:20px;
+
+#header{
+        float: left;
+        width: 1024px;
+        height: 150px;
+ 
+        background: url(../images/headerEB.png);
+}
+
+
+
+#wrapper {
+        float: left;
         margin: 0 auto ;
         width: 1024px;
         height: 2000px;
         background: url(../images/wrapper.png);
-        z-index: 1;
     }
 
 
@@ -114,19 +64,19 @@ section {
     background-color: black;
 }
 
-nav, article, aside {
+nav{
     float: left;
 }
 
 article {
-    padding: 0 20px;
-    /*background-color: red;*/
+    float: left;
+    padding: 20px 20px;
     width: 470px;
     _width: 430px;
 }
 
 aside {
-    /*background-color: grey;*/
+    float: right;
     padding: 0 20px;
     width: 200px;
     _width: 170px;
@@ -140,14 +90,13 @@ ul.nav {
     width: 380px;
     height: 30px;
     padding: 16px 0 0 0;
-    position: absolute;
-    top: 41px;
-    right: -320px;
+    top: 34px;
+    float: right;
     text-align: center;
 }
 
     ul.nav li {
-        font: 14px/14px Georgia, 'Times New Roman', Times, serif;
+        font: 14px/14px Arial, 'Times New Roman', Times, serif;
         color: white;
         display: inline;
     }
@@ -228,7 +177,7 @@ fieldset {
 
 
 /*Klassen*/
-
+/*
 .artikel_neu {
     float: left;
     display: block;
@@ -258,3 +207,36 @@ fieldset {
     height: auto;
     margin: 10px;
 }
+
+
+
+
+div {
+    position: auto;
+    right: 100px;
+}
+
+    div.header {
+        width: 1024px;
+        height: 100px;
+        top:10px;
+        right: -200px;
+        background: url(../images/headerEB.png);
+        z-index: 2;
+    }
+
+        div.header div {
+            margin: 0 auto;
+            width: 650px;
+        }
+
+h1 {
+    text-indent: -9999px;
+    background: url(../images/logoneu.png) no-repeat;
+    width: 1024px;
+    height: 150px;
+    position: relative;
+    top: 0px;
+    left: -300px;
+}
+*/
