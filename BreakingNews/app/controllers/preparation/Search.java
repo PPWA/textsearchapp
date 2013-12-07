@@ -1,6 +1,7 @@
 package controllers.preparation;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -90,9 +91,14 @@ public class Search {
 	 * @throws Exception
 	 *             wenn der spezifizierte Index nicht vorhanden ist.
 	 */
-	public static IndexSearcher getSearcher() throws Exception {
-		reader = DirectoryReader.open(FSDirectory.open(new File(indexPath)));
-		return new IndexSearcher(reader);
+	public static IndexSearcher getSearcher() {
+		try {
+			reader = DirectoryReader.open(FSDirectory.open(new File(indexPath)));
+			return new IndexSearcher(reader);
+		} catch (IOException e) {
+			System.out.println("Index-Verzeichnis nicht vorhanden.");
+			return null;
+		}
 	}
 
 	/**
@@ -217,6 +223,7 @@ public class Search {
 			IndexSearcher searcher = getSearcher();
 			
 			// Erstellung der Suchanfrage
+			System.out.println("Suchanfrage an Lucene wird durchgefuehrt ...");
 			BooleanQuery booleanQuery = new BooleanQuery();
 			Query query1 = new TermQuery(new Term("isNew", NEWTOPICQUERY));
 			Query query2 = NumericRangeQuery.newLongRange("date",
@@ -232,8 +239,10 @@ public class Search {
 				documents.add(d);
 			}
 			reader.close();
+			System.out.println("Suchergebnisse ermittelt!");
 			return documents;
 		} catch (Exception e) {
+			System.out.println("Fehler beim Ausführen der Suchanfrage");
 			return new ArrayList<Document>();
 		}
 	}
@@ -260,6 +269,7 @@ public class Search {
 			IndexSearcher searcher = getSearcher();
 
 			// Erstellung der Suchanfrage
+			System.out.println("Suchanfrage an Lucene wird durchgefuehrt ...");
 			BooleanQuery booleanQuery = new BooleanQuery();
 			Query query1 = new TermQuery(new Term(queryfield, querystr));
 			Query query2 = NumericRangeQuery.newLongRange("date",
@@ -303,9 +313,10 @@ public class Search {
 				lastDocOld = lastDoc;
 				endOld = end;
 			}
+			System.out.println("Suchergebnisse ermittelt!");
 			return documents;
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Fehler beim Ausführen der Suchanfrage");
 			return new ArrayList<Document>();
 		}
 	}
