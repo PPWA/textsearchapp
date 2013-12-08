@@ -1,7 +1,5 @@
 package controllers.preparation;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -12,8 +10,6 @@ import java.util.List;
 import models.Newsportal;
 
 import org.apache.lucene.document.Document;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -24,7 +20,8 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.Sort;
 import org.apache.lucene.search.SortField;
 import org.apache.lucene.search.TermQuery;
-import org.apache.lucene.store.FSDirectory;
+
+import controllers.Application;
 
 /**
  * Erzeugt je nach Anfrage der Klasse Preparation eine Query, stellt diese an
@@ -78,29 +75,6 @@ public class Search {
 	 * zur&uuml;ckgeschaut werden soll
 	 */
 	private static int timeframe = 90;
-	/**
-	 * Globale Referenz auf den Reader f&uuml;r alle Suchanfragen.
-	 */
-	private static IndexReader reader;
-
-	/**
-	 * &ouml;ffnet einen SuchReader auf dem angegebenen Index auf der Festplatte und
-	 * gibt ihn zur&uuml;ck.
-	 * 
-	 * @return eine Referenz auf den SearchReader
-	 * @throws Exception
-	 *             wenn der spezifizierte Index nicht vorhanden ist.
-	 */
-	public static IndexSearcher getSearcher() {
-		try {
-			reader = DirectoryReader.open(FSDirectory.open(new File(indexPath)));
-			return new IndexSearcher(reader);
-		} catch (IOException e) {
-			System.out.println("Index-Verzeichnis nicht vorhanden.");
-			return null;
-		}
-	}
-
 	/**
 	 * Gibt das aktuelle Datum als Integer zur&uuml;ck.
 	 * 
@@ -220,7 +194,7 @@ public class Search {
 			Sort sort = new Sort(new SortField("date", SortField.Type.STRING,
 					true));
 			ScoreDoc[] hits = null;
-			IndexSearcher searcher = getSearcher();
+			IndexSearcher searcher = Application.getSearcher();
 			
 			// Erstellung der Suchanfrage
 			System.out.println("Suchanfrage an Lucene wird durchgefuehrt ...");
@@ -238,7 +212,7 @@ public class Search {
 				Document d = searcher.doc(docId);
 				documents.add(d);
 			}
-			reader.close();
+			Application.getReader().close();
 			System.out.println("Suchergebnisse ermittelt!");
 			return documents;
 		} catch (Exception e) {
@@ -266,7 +240,7 @@ public class Search {
 			ScoreDoc[] hits = null;
 			Sort sort = new Sort(new SortField("date", SortField.Type.LONG,
 					true));
-			IndexSearcher searcher = getSearcher();
+			IndexSearcher searcher = Application.getSearcher();
 
 			// Erstellung der Suchanfrage
 			System.out.println("Suchanfrage an Lucene wird durchgefuehrt ...");
@@ -284,6 +258,7 @@ public class Search {
 				// Listenanfang
 				end = false;
 				hits = searcher.search(booleanQuery, hitsPerPage, sort).scoreDocs;
+				System.out.println(searcher.getSimilarity());
 			} else {
 				// Listenfortsetzung
 				if (end) {
@@ -305,7 +280,7 @@ public class Search {
 				lastDoc = null;
 				end = true;
 			}
-			reader.close();
+			Application.getReader().close();
 			if (k == NEWTOPICQUERY) {
 				lastDocNew = lastDoc;
 				endNew = end;

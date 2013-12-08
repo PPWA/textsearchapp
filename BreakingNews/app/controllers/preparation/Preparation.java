@@ -2,7 +2,6 @@ package controllers.preparation;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -17,8 +16,6 @@ import views.html.index;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import controllers.analysis.Analysis;
 
 /**
  * Erzeugt aus den von der Klasse Search erhaltenen Ergebnissen eine Ausgabe im
@@ -96,11 +93,10 @@ public class Preparation extends Controller {
 			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
 			article.put("art_topichash", document.get("topichash"));
-			article.put("art_explanation", document.get("explanation"));
 			articles.add(article);
 		}
 		String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
-		System.out.println("JSON fertiggestellt in " + duration + " Sekunden!");
+		System.out.println("JSON fertiggestellt! Gesamtzeit der Operation: " + duration + " Sekunden.");
 		response.put("articles", articles);
 		return ok(response);
 	}
@@ -148,10 +144,11 @@ public class Preparation extends Controller {
 			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
 			article.put("art_topichash", document.get("topichash"));
+			article.put("art_explanation", document.get("explanation"));
 			articles.add(article);
 		}
 		String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
-		System.out.println("JSON fertiggestellt in " + duration + " Sekunden!");
+		System.out.println("JSON fertiggestellt! Gesamtzeit der Operation:  " + duration + " Sekunden");
 		response.put("articles", articles);
 		return ok(response);
 	}
@@ -189,7 +186,7 @@ public class Preparation extends Controller {
 			articles.add(article);
 		}
 		String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
-		System.out.println("JSON fertiggestellt in " + duration + " Sekunden!");
+		System.out.println("JSON fertiggestellt! Gesamtzeit der Operation:  " + duration + " Sekunden");
 		response.put("articles", articles);
 		return ok(response);
 	}
@@ -218,7 +215,7 @@ public class Preparation extends Controller {
 			newsportals.add(newsportal);
 		}
 		String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
-		System.out.println("JSON fertiggestellt in " + duration + " Sekunden!");
+		System.out.println("JSON fertiggestellt! Gesamtzeit der Operation:  " + duration + " Sekunden");
 		response.put("newsportals", newsportals);
 		return ok(response);
 	}
