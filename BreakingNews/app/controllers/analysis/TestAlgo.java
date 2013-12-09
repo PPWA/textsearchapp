@@ -3,6 +3,8 @@ package controllers.analysis;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.Token;
@@ -43,9 +45,15 @@ import controllers.preparation.Search;
 
 public class TestAlgo {
 	
+	// Prozentuales Vorkommen in allen Dokumenten, ab der ein Wort noch als selten gilt:
 	private final static float RARE_APPEARANCE = (float) 0.15; // in percent
-	private static Similarity sim;
 	
+	// Anzahl der seltenen Wörter, ab der ein Dokument als selbes Thema angesehen wird:
+	private final static int RARE_WORDS_IN_DOC = 5;
+	
+	private static ArrayList<String> rareWords = new ArrayList<String>();
+	
+	private static Similarity sim;
 	public static ArrayList<Integer> freqs;
 	
 	public TestAlgo() {
@@ -53,10 +61,7 @@ public class TestAlgo {
 	}
 	
 	public static String hasSimilarRareWords(String text) {
-		String topicHash = "";
-		ArrayList<String> rareWords = new ArrayList<String>();
 		int rareRangeMax = (int) (Application.getNumberOfAllDocuments()*RARE_APPEARANCE);
-		System.out.println("rareRangeMax: "+rareRangeMax);
 		
 		ArrayList<String> tokens = tokenizeAndRemoveStopWords(text);
 		int max = 0;
@@ -64,6 +69,9 @@ public class TestAlgo {
 		
 		IndexSearcher searcher = Application.getSearcher();
 		Query query2 = NumericRangeQuery.newLongRange("date",Search.getLowerBound(), Search.getUpperBound(), true, true);
+		
+		// Integer docId, int sameRareWordsCount
+		Map<Integer, Integer> maybeSimilarDocs = new HashMap<Integer, Integer>();
 		
 		for(int i=0; i<tokens.size(); i++) {
 			System.out.println("\n\""+tokens.get(i)+"\":");
@@ -76,33 +84,38 @@ public class TestAlgo {
 				e.printStackTrace();
 			}
 			
-			sim = new DefaultSimilarity() {
-				public float idf(long i, long i1) {
-					return 1;
-				}
-				
+/*			sim = new DefaultSimilarity() {
 				public float tf(float freq) {
 					TestAlgo.freqs.add((int) freq);
 					return super.tf(freq);
 				}
 			};
 			searcher.setSimilarity(sim);
-			freqs = new ArrayList<Integer>();
+			freqs = new ArrayList<Integer>(); */
 			
 			try {
 				TopDocs topDocs = searcher.search(booleanQuery, 1);
 				System.out.println("Gefunden in "+topDocs.totalHits+" Dokumenten.");
 				
 				if(topDocs.totalHits <= rareRangeMax) {
-//				if(true) {
 					rareWords.add(tokens.get(i));
-					
-//					ScoreDoc[] hits = topDocs.scoreDocs;
-//					for(int j=0; j<hits.length; j++) {
-//						System.out.println(tokens.get(i)+", Score: "+hits[j].score);
-//					}
-					for(int j=0; j<freqs.size(); j++) {
+/*					for(int j=0; j<freqs.size(); j++) {
 						System.out.println("In Dok"+(j+1)+": "+freqs.get(j)+" mal.");
+					} */
+					
+					ScoreDoc[] hits = topDocs.scoreDocs;
+					for(int j=0; j<hits.length; j++) {
+						int temp = 0;
+						
+						if(maybeSimilarDocs.get(hits[j].doc)!=null)
+							temp = maybeSimilarDocs.get(hits[j].doc);
+							
+						
+						if(++temp >= RARE_WORDS_IN_DOC) {
+							System.out.println("Mehr als "+RARE_WORDS_IN_DOC+" seltene Worte in Dokument >>> Kein neues Thema.");
+							return searcher.doc(hits[0].doc).get("topichash");
+						}
+						maybeSimilarDocs.put(hits[j].doc, temp);
 					}
 				}
 				
@@ -115,45 +128,34 @@ public class TestAlgo {
 				e.printStackTrace();
 			} 
 		}
-//		System.out.println("Min: "+min+", Max: "+max);
-		System.out.println("All Docs: "+Application.getNumberOfAllDocuments());
-		tokens = null;
-		
-		
-		for(String rareWord : rareWords) {
-			
-		}
 
-		return topicHash;
+		return "";
 	}
 	
+
 	public static void checkTF(String word) {
 		Term term = new Term("text",word);
 		IndexReader reader;
+		reader = Application.getReader();
+		
 		try {
-			reader = Application.getReader();
-			
-			try {
-				DocsEnum docEnum = MultiFields.getTermDocsEnum(reader, MultiFields.getLiveDocs(reader), "text", term.bytes());
-				int termFreq = 0;
+			DocsEnum docEnum = MultiFields.getTermDocsEnum(reader, MultiFields.getLiveDocs(reader), "text", term.bytes());
+			int termFreq = 0;
 
-				int doc = DocsEnum.NO_MORE_DOCS;
-				int i=0;
-				docEnum.nextDoc();
-				System.out.println("Freq: "+docEnum.freq());
+			int doc = DocsEnum.NO_MORE_DOCS;
+			int i=0;
+			docEnum.nextDoc();
+			System.out.println("Freq: "+docEnum.freq());
 /*				while ((doc = docEnum.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
 //				    termFreq += docEnum.freq();
 					System.out.println("In Dok"+i+" ist "+word+" "+docEnum.freq()+" mal.");
 					i++;
 				}*/
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		} catch (IOException e1) {
-			System.out.println("Algorithm.java, checkTermTrequencies(): Error getting IndexReader.");
-//			return "";
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 	}
+	
 	
 	/**
 	 * Term-Frequenz aller Begriffe in allen Dokumenten
@@ -162,12 +164,12 @@ public class TestAlgo {
 	public static String checkTermFrequencies() {
 		TFIDFSimilarity tfSim = new DefaultSimilarity();
 		IndexReader reader;
-		try {
+//		try {
 			reader = Application.getReader();
-		} catch (IOException e1) {
+/*		} catch (IOException e1) {
 			System.out.println("Algorithm.java, checkTermTrequencies(): Error getting IndexReader.");
 			return "";
-		}
+		} */
 		
 		for (int docID=0; docID<Application.getNumberOfAllDocuments(); docID++) {      
 	        try {
@@ -226,7 +228,7 @@ public class TestAlgo {
 
 	
 	public static void main(String[] args) {
-		String teeeest = "Leopard, Zebra, Tiger. Seit Jahren versuchen Designer ihr Glück mit Animal-Prints. In freier Wildbahn gab es diese Muster meist in der Damenmode zu bewundern. Bisher. Denn die wilde Mode-Safari hat sich in die aktuellen Herren-Kollektionen eingeschlichen – nicht bei schrillen Underground-Designern, sondern bei den Großen der Branche wie Burberry Prorsum oder Louis Vuitton. Wenn es um Mode mit exotischen Mustern geht, verhalten sich Männer meist scheu wie ein Zebra. Ausnahme: Rockstars. Typen wie Rod Stewart (68) oder Steven Tyler (65) von „Aerosmith“ tragen seit Jahrzehnten Tierfell-Optik – und kommen damit großartig an bei den Frauen.";
+		String teeeest = "Leopard, Leopard, Zebra, Tiger. Seit Jahren versuchen Designer ihr Glück mit Animal-Prints. In freier Wildbahn gab es diese Muster meist in der Damenmode zu bewundern. Bisher. Denn die wilde Mode-Safari hat sich in die aktuellen Herren-Kollektionen eingeschlichen – nicht bei schrillen Underground-Designern, sondern bei den Großen der Branche wie Burberry Prorsum oder Louis Vuitton. Wenn es um Mode mit exotischen Mustern geht, verhalten sich Männer meist scheu wie ein Zebra. Ausnahme: Rockstars. Typen wie Rod Stewart (68) oder Steven Tyler (65) von „Aerosmith“ tragen seit Jahrzehnten Tierfell-Optik – und kommen damit großartig an bei den Frauen.";
 //		String teeeest = "Privatsphäre";
 		
 		TestAlgo.hasSimilarRareWords(teeeest);
