@@ -1,41 +1,36 @@
  @(message: String) @main {
 
 
-<!-- <h1>Early Bird News bla</h1> -->
-
-
-<div id="header">
-	<div>
-	<img alt="Early Bird News" src="@routes.Assets.at("images/logoneu.png")">	
-		<ul class="nav">
-			<li>
-                <a href="#" onclick="refresh()" class="btnRefresh">Refresh</a>  
-			</li>
-		</ul><!--Button-->
-              
-	</div>
-</div><!--header-->
-     
-
-<div id="wrapper">
-     <article>
-     
-     
-         <!-- JSON Ausgabe-->
-         <div id="output">
-            
-         </div>
          
-
-     </article> <!--Neue Artikel-->
-     
-     
-     <aside>
-
-
- 
-     </aside>
- 
- </div>
-
+    <header>
+		<div id="head_wrapper" class="wrapper">
+			<div id="logo">
+				<img src="@routes.Assets.at("images/logo.png")" alt="" />
+				<h1>Early Bird News</h1>
+				<div style="clear:both;"></div>
+			</div>
+		
+			<a href="" onclick="refresh()">
+				<img id="btn_refresh" src="@routes.Assets.at("images/refresh.png")" alt="Refresh" />
+			</a>
+			<div style="clear:both;"></div>
+		</div>
+	</header>
+	
+	<div id="main_wrapper" class="wrapper">
+		<div id="main">
+			
+			
+		</div>
+		
+		<aside id="right_column">
+			<div id="rightArticle">
+			 <!-- JSON Ausgabe-->
+         		
+			</div>
+	
+		</aside>
+		<div style="clear:both;"></div>
+	</div>
+	<div id="birds_bg"></div>
 }
