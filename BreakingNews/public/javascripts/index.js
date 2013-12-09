@@ -18,7 +18,7 @@ function init(){
 					'</a>'+
 				'</div>'
 				+ 
-				'<img class="art_img" src="'+ item["art_urlpicture"]+ '" alt="" />'
+				'<img class="art_img" src="'+ item["art_urlpicture"] + '" alt="" />'
 				+ 
 				'<div class="art_main">'+
 					'<a href="'+ item["art_urlsource"]+ '" >'+'<p class="art_newsportal">'+ item["art_newportal"] +'</p>'+'</a>'+
@@ -28,28 +28,8 @@ function init(){
 				'<div class="art_time">'+'<p>'+ item["art_date"]+ '</p>'+'</div>'
 				+
 				'<div style="clear:both;">'+'</div>';
-				
-
-				//alert("test2");
 			
 			$("#main").append("<article>" + curArticle + "</article>");
-
-			
-
-			/*
-			 * 	+
-				'<div class="art_similar">'+'<a href="">'+'<p>'+ 
-					'<img src="images/plus.png" alt="" />'+ item["art_similar"]'</p>'+'</a>'+'</div>'
-				
-			$("#output").append("<div>" + item["art_date"] + "</div>"); 
-			$("#output").append("<div>" + item["art_title"] + "</div>");
-			$("#output").append("<div>" + item["art_teaser"] + "</div>");
-			$("#output").append("<div>" + item["art_urlsource"] + "</div>");
-			$("#output").append("<div>" + item["art_urlpicture"] + "</div>");
-			$("#output").append("<div>" + item["art_newportal"] + "</div>");
-			$("#output").append("<div>" + item["art_topicHash"] + "</div>");
-			$("#output").append("<div>" + item["art_explanation"] + "</div>" + "<br>");
-			*/	
 
 			}); 
 		}); 
@@ -58,7 +38,7 @@ function init(){
 
 
 function oldArticles(){
-$.getJSON("/new-topics", function (data){ 
+$.getJSON("/old-topics", function (data){ 
 	$.each(data.articles, function(i,item) { 
 	
 		var oldArticle = " ";
@@ -71,8 +51,8 @@ $.getJSON("/new-topics", function (data){
 					'<h2>'+ item["art_title"] +'</h2>'+
 				'</a>'+
 			'</div>'
-			+ '<br>'+
-			'<img class="art_img" src="'+ item["art_urlpicture"]+ '" alt="" />'
+			+ 	
+			'<img class="art_img" src="'+ item["art_urlpicture"] + '" alt="" />'
 			+ 
 			'<div class="art_main">'+
 				'<a href="'+ item["art_urlsource"]+ '" >'+'<p class="art_newsportal">'+ item["art_newportal"] +'</p>'+'</a>'+
@@ -84,7 +64,7 @@ $.getJSON("/new-topics", function (data){
 			'<div style="clear:both;">'+'</div>';
 			
 
-		$("#rightArticle").append("<div>" + oldArticle + "</div>");
+		$("#right_column").append("<div>" + oldArticle + "</div>");
 		
 
 		}); 
@@ -96,7 +76,6 @@ function refresh(){
 		if (data.new_art_count != 0){
 			init();
 		}
-
 		
 		}); 
 	}
