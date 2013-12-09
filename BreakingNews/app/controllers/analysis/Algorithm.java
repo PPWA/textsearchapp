@@ -1,8 +1,11 @@
 package controllers.analysis;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
@@ -11,8 +14,6 @@ import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
-import org.apache.lucene.search.similarities.DefaultSimilarity;
-import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.util.Version;
 
 import controllers.Application;
@@ -28,38 +29,57 @@ public class Algorithm {
 
 	List<String> rareWords = new ArrayList<String>();
 
-	public static String hasSimilarTitle(String title) {
+	public static String hasSimilarTitle(String queryTitle) {
+		// Fall: Gleiche Themen als unterschiedlich erkannt
+		// Häufigkeit: wahrscheinlich
+		// Folge: Kein Problem, da spätere Funktionen korrigieren
+
+		// Fall: Unterschiedliche Themen als gleich erkannt
+		// Häufigkeit: gering
+		// Folge: Neues Thema geht unter
 		String topicHash = "";
 		TopDocs topDocs;
 		ScoreDoc[] hits = null;
 		IndexSearcher searcher = Application.getSearcher();
 		Query query1;
 		Query query2;
-		Similarity sim;
+		String docTitle;
+		StringTokenizer queryTokenizer;
+		StringTokenizer docTokenizer;
+		String currentQueryToken;
+		int i = 0;
 
 		try {
 			BooleanQuery booleanQuery = new BooleanQuery();
-			query1 = new QueryParser(Version.LUCENE_46, "title",Application.getAnalyzer()).parse(title);
-			query2 = NumericRangeQuery.newLongRange("date",Search.getLowerBound(), Search.getUpperBound(), true, true);
+			query1 = new QueryParser(Version.LUCENE_46, "title", Application.getAnalyzer()).parse(queryTitle);
+			query2 = NumericRangeQuery.newLongRange("date", Search.getLowerBound(), Search.getUpperBound(), true, true);
 			booleanQuery.add(query1, BooleanClause.Occur.MUST);
 			booleanQuery.add(query2, BooleanClause.Occur.MUST);
-			
-			sim = new DefaultSimilarity() {
-				  public float lengthNorm(int i, int i1) {
-				    return 10;
-				  }
-				};	
-			searcher.setSimilarity(sim);
-			topDocs = searcher.search(booleanQuery, 1);
-			hits = topDocs.scoreDocs;
-			
-			System.out.println(topDocs.getMaxScore());
-			if (hits.length == 1 && topDocs.getMaxScore() > 0.9) {
-				topicHash = searcher.doc(hits[0].doc).get("topichash");
-				System.out.println("Aehnlicher Titel gefunden! Aehnlichkeit: " +topDocs.getMaxScore() + " Hash: " + topicHash);
+			hits = searcher.search(booleanQuery, 1).scoreDocs;
+
+			if (hits.length == 1) {
+				docTitle = searcher.doc(hits[0].doc).get("title");
+				queryTokenizer = new StringTokenizer(queryTitle);
+
+				while (queryTokenizer.hasMoreTokens()) {
+					currentQueryToken = queryTokenizer.nextToken();
+					docTokenizer = new StringTokenizer(docTitle);
+					while (docTokenizer.hasMoreTokens()) {
+						System.out.println("test");
+						if (currentQueryToken.equals(docTokenizer.nextToken())) {
+							i++;
+							break;
+						}
+					}
+				}
+
+				if (i >= 3) {
+					topicHash = searcher.doc(hits[0].doc).get("topichash");
+					System.out.println("Aehnlicher Titel gefunden: " + topicHash);
+				}	
 			}
 			Application.getReader().close();
-		} catch (Exception e) {
+		} catch (IOException | ParseException e) {
 			System.out.println("hasSimilarTitle fehlgeschlagen da Index nicht vorhanden.");
 		}
 		return topicHash;

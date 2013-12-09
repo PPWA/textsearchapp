@@ -12,6 +12,7 @@ import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
@@ -39,6 +40,12 @@ public class Application extends Controller {
 
 	private static Directory dir;
 
+	private static Similarity sim = new DefaultSimilarity() {
+		public float idf(long i, long i1) {
+			return 1;
+		}
+	};
+
 	public static Analyzer getAnalyzer() {
 		return analyzer;
 	}
@@ -60,19 +67,21 @@ public class Application extends Controller {
 	public static Result index() {
 		return ok(index.render("Home"));
 	}
+
 	/**
-	 * &ouml;ffnet einen SuchReader auf dem angegebenen Index auf der Festplatte und
-	 * gibt ihn zur&uuml;ck.
+	 * &ouml;ffnet einen SuchReader auf dem angegebenen Index auf der Festplatte
+	 * und gibt ihn zur&uuml;ck.
 	 * 
 	 * @return eine Referenz auf den SearchReader
 	 * @throws Exception
 	 *             wenn der spezifizierte Index nicht vorhanden ist.
 	 */
+
 	public static IndexSearcher getSearcher() {
 		try {
 			reader = DirectoryReader.open(FSDirectory.open(file));
 			IndexSearcher searcher = new IndexSearcher(reader);
-			searcher.setSimilarity(new DefaultSimilarity()); //enthaehlt Vector Space Model
+			searcher.setSimilarity(sim);
 			return searcher;
 		} catch (IOException e) {
 			System.out.println("Index-Verzeichnis nicht vorhanden.");
@@ -83,8 +92,8 @@ public class Application extends Controller {
 	public static IndexWriter getWriter() {
 		try {
 			dir = FSDirectory.open(file);
-			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,analyzer).
-					setSimilarity(new DefaultSimilarity()); //enthaehlt Vector Space Model
+			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,
+					analyzer).setSimilarity(sim);
 			iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
 			return new IndexWriter(dir, iwc);
 		} catch (Exception e) {
