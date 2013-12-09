@@ -96,8 +96,10 @@ public class Analysis {
 					try {
 						q = new QueryParser(Version.LUCENE_46, "topichash", Application.getAnalyzer()).parse(topicHash);
 						count = Application.getSearcher().search(q, 1).totalHits;
-						Application.getReader().close();
-					} catch (Exception e) {}
+						Application.closeAll();
+					} catch (Exception e) {
+						System.out.println("Index-Verzeichnis nicht vorhanden.");
+					}
 					
 					if (count > 0) {
 						l++;
@@ -115,6 +117,7 @@ public class Analysis {
 		Document doc = new Document();
 		System.out.println("Lege Artikel im Index ab ...");
 		try {
+			System.out.println(isNew);
 			doc.add(new StringField("isNew", isNew, Field.Store.YES)); // StringField = Field.Index.NOT_ANALYZED
 			doc.add(new StringField("topichash", topicHash, Field.Store.YES));
 			doc.add(new TextField("title", title, Field.Store.YES)); // TextField = Field.Index.ANALYZED
@@ -126,10 +129,8 @@ public class Analysis {
 			doc.add(new StoredField("urlpicture", urlpicture));
 			doc.add(new StoredField("explanation", explanation));
 
-			writer = Application.getWriter();
-			writer.addDocument(doc);
-			writer.close();
-			Application.getDir().close();
+			Application.getWriter().addDocument(doc);
+			Application.closeAll();
 			System.out.println("Artikel im Index gespeichert!");
 		} catch (Exception e) {
 			System.out.println("Artikel konnte nicht im Index gespeichert werden.");

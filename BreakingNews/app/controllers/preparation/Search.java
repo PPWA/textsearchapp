@@ -66,12 +66,7 @@ public class Search {
 	 * startet
 	 */
 	private static int hitsPerPage = 5;
-	/**
-	 * Indentifier f&uuml;r den Index auf der Festplatte
-	 */
-	public static String indexPath = "index2";
-	/**
-	 * Gibt in ganzen Tagen an, wie weit bei Suchanfragen in die Vergangenheit
+	/* Gibt in ganzen Tagen an, wie weit bei Suchanfragen in die Vergangenheit
 	 * zur&uuml;ckgeschaut werden soll
 	 */
 	private static int timeframe = 90;
@@ -212,11 +207,11 @@ public class Search {
 				Document d = searcher.doc(docId);
 				documents.add(d);
 			}
-			Application.getReader().close();
+			Application.closeAll();
 			System.out.println("Suchergebnisse ermittelt!");
 			return documents;
 		} catch (Exception e) {
-			System.out.println("Fehler beim Ausführen der Suchanfrage");
+			System.out.println("Fehler beim Ausfuehren der Suchanfrage");
 			return new ArrayList<Document>();
 		}
 	}
@@ -258,7 +253,6 @@ public class Search {
 				// Listenanfang
 				end = false;
 				hits = searcher.search(booleanQuery, hitsPerPage, sort).scoreDocs;
-				System.out.println(searcher.getSimilarity());
 			} else {
 				// Listenfortsetzung
 				if (end) {
@@ -280,7 +274,7 @@ public class Search {
 				lastDoc = null;
 				end = true;
 			}
-			Application.getReader().close();
+			Application.closeAll();
 			if (k == NEWTOPICQUERY) {
 				lastDocNew = lastDoc;
 				endNew = end;
@@ -291,7 +285,7 @@ public class Search {
 			System.out.println("Suchergebnisse ermittelt!");
 			return documents;
 		} catch (Exception e) {
-			System.out.println("Fehler beim Ausführen der Suchanfrage");
+			System.out.println("Fehler beim Ausfuehren der Suchanfrage");
 			return new ArrayList<Document>();
 		}
 	}

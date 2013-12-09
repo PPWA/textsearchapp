@@ -78,7 +78,7 @@ public class Algorithm {
 					System.out.println("Aehnlicher Titel gefunden: " + topicHash);
 				}	
 			}
-			Application.getReader().close();
+			Application.closeAll();
 		} catch (IOException | ParseException | NullPointerException e) {
 			System.out.println("hasSimilarTitle fehlgeschlagen da Index nicht vorhanden.");
 		}

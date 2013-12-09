@@ -32,33 +32,85 @@ public class Application extends Controller {
 
 	// inkl. StandardTokenizer, LowerCaseFilter, StopwortFilter
 	private static Analyzer analyzer = new GermanAnalyzer(Version.LUCENE_46);
-	private static File file = new File(Search.indexPath);
+	private static File file = new File("index2");
+	private static Directory dir;
 	/***
 	 * Globale Referenz auf den Reader f&uuml;r alle Suchanfragen.
 	 */
 	private static IndexReader reader;
-
-	private static Directory dir;
+	private static IndexWriter writer;
 
 	private static Similarity sim = new DefaultSimilarity() {
 		public float idf(long i, long i1) {
 			return 1;
 		}
 	};
+	
+	/**
+	 * &Ouml;ffnet einen SuchReader auf dem angegebenen Index auf der Festplatte
+	 * und gibt ihn zur&uuml;ck.
+	 * 
+	 * @return eine Referenz auf den SearchReader
+	 * @throws Exception
+	 *             wenn der spezifizierte Index nicht vorhanden ist.
+	 */
+	public static IndexSearcher getSearcher() {
+		try {
+			dir = FSDirectory.open(file);
+			reader = DirectoryReader.open(dir);
+			IndexSearcher searcher = new IndexSearcher(reader);
+			searcher.setSimilarity(sim);
+			return searcher;
+		} catch (Exception e) {
+			System.out.println("Index-Verzeichnis nicht vorhanden.");
+			return null;
+		}
+	}
+	
+	public static IndexWriter getWriter() {
+		try {
+			dir = FSDirectory.open(file);
+			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,
+					analyzer).setSimilarity(sim);
+			iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
+			writer = new IndexWriter(dir, iwc);
+			return writer;
+		} catch (Exception e) {
+			System.out.println("Index-Verzeichnis nicht vorhanden.");
+			return null;
+		}
+	}
+	
+	public static void closeAll() {	
+		try {
+			if (writer != null) writer.close();
+			if (reader != null) reader.close();
+			if (dir != null) dir.close();	
+		} catch (IOException e) {
+			System.out.println("Fehler beim Schließen der Workers.");
+		}
+	}
 
 	public static Analyzer getAnalyzer() {
 		return analyzer;
 	}
-
-	public static IndexReader getReader() throws IOException {
-		reader = DirectoryReader.open(FSDirectory.open(file));
+	
+	public static IndexReader getReader() {
 		return reader;
 	}
 
-	public static Directory getDir() {
-		return dir;
+	/**
+	 * Gibt die Anzahl aller im Index gespeicherten Dokumente zur&uuml;ck.
+	 * @return Anzahl aller Dokumente im Index
+	 */
+	public static int getNumberOfAllDocuments() {
+		try {
+			return reader.numDocs();
+		} catch (Exception e) {
+			return 0;
+		}
 	}
-
+		
 	/**
 	 * Gibt die Startseite zur&uuml;ck, sobald ein Client diese aufruft.
 	 * 
@@ -68,51 +120,4 @@ public class Application extends Controller {
 	public static Result index() {
 		return ok(index.render("Home"));
 	}
-
-	/**
-	 * &Ouml;ffnet einen SuchReader auf dem angegebenen Index auf der Festplatte
-	 * und gibt ihn zur&uuml;ck.
-	 * 
-	 * @return eine Referenz auf den SearchReader
-	 * @throws Exception
-	 *             wenn der spezifizierte Index nicht vorhanden ist.
-	 */
-
-	public static IndexSearcher getSearcher() {
-		try {
-			getReader();
-			IndexSearcher searcher = new IndexSearcher(reader);
-			searcher.setSimilarity(sim);
-			return searcher;
-		} catch (IOException e) {
-			System.out.println("Index-Verzeichnis nicht vorhanden.");
-			return null;
-		}
-	}
-
-	public static IndexWriter getWriter() {
-		try {
-			dir = FSDirectory.open(file);
-			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,
-					analyzer).setSimilarity(sim);
-			iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
-			return new IndexWriter(dir, iwc);
-		} catch (Exception e) {
-			System.out.println("Index-Verzeichnis nicht vorhanden.");
-			return null;
-		}
-	}
-	
-	/**
-	 * Gibt die Anzahl aller im Index gespeicherten Dokumente zur&uuml;ck.
-	 * @return Anzahl aller Dokumente im Index
-	 */
-	public static int getNumberOfAllDocuments() {
-		try {
-			return getReader().numDocs();
-		} catch (IOException e) {
-			return 0;
-		}
-	}
-
 }
