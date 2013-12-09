@@ -20,7 +20,6 @@ import org.apache.lucene.util.Version;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
-import controllers.preparation.Search;
 
 /**
  * Klasse ist der Standard-Einstiegspunkt von Play!
