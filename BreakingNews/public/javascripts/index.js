@@ -1,8 +1,8 @@
-
 $(init); 
 $(oldArticles)
 
 function init(){ 
+	$("#main").html("");	
 	$.getJSON("/new-topics", function (data){ 
 		$.each(data.articles, function(i,item) { 
 
@@ -12,11 +12,11 @@ function init(){
 				
 				'<div class="art_header">'+
 					'<a href="'+ item["art_urlsource"]+ '">' +
-						'<img class="img_rss" src="../images/rss.png" alt="rss" />'+
+						'<img class="img_rss" src="/assets/images/rss.png" alt="rss" />'+
 						'<h2>'+ item["art_title"] +'</h2>'+
 					'</a>'+
 				'</div>'
-				+ '<br>'+
+				+ 
 				'<img class="art_img" src="'+ item["art_urlpicture"]+ '" alt="" />'
 				+ 
 				'<div class="art_main">'+
@@ -91,35 +91,11 @@ $.getJSON("/new-topics", function (data){
 }
 
 function refresh(){ 
-	$.getJSON("/new-topics", function (data){ 
-		$.each(data.articles, function(i,item) { 
+	$.getJSON("/start-search", function (data){ 
+		if (data.new_art_count != 0){
+			init();
+		}
 
-			var furArticle = " ";
-			
-			furArticle = 				
-				
-				'<div class="art_header">'+
-					'<a href="'+ item["art_urlsource"]+ '">' +
-						'<img class="img_rss" src="../images/rss.png" alt="" />'+
-						'<h2>'+ item["art_title"] +'</h2>'+
-					'</a>'+
-				'</div>'
-				+ '<br>'+
-				'<img class="art_img" src="'+ item["art_urlpicture"]+ '" alt="" />'
-				+ '<br>'+
-				'<div class="art_main">'+
-					'<a href="'+ item["art_urlsource"]+ '" >'+'<p class="art_newsportal">'+ item["art_newportal"] +'</p>'+'</a>'+
-					'<p class="teaser">'+ item["art_teaser"] +'</p>'+
-				'</div>'
-				+ '<br>'+
-				'<div class="art_time">'+'<p>'+ item["art_date"]+ '</p>'+'</div>'+ '<br>'+
-
-				'<div style="clear:both;">'+'</div>';
-				
-			
-			$("#main").append("<article>" + furArticle + "</article>");
-			
-
-			}); 
+		
 		}); 
 	}
