@@ -161,8 +161,9 @@ public class Acquisition {
 			String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
 			System.out.println("Acquisition.java: Succesfully read XML in "+duration+" seconds!");
 		} catch (SAXException e) {
-			e.printStackTrace();
 			System.out.println("Acquisition.java: SAX-Error while parsing "+pathToFile);
+			handl.setIsEndOfDocument(true);
+			deleteFile(pathToFile);
 		} catch (FileNotFoundException e) {
 			System.out.println("Acquisition.java: Could not find "+pathToFile+"!");
 		} catch (IOException e) {

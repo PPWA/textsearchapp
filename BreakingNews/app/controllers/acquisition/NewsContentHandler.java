@@ -150,6 +150,10 @@ public class NewsContentHandler implements ContentHandler {
 		return isEndOfDocument;
 	}
 	
+	public void setIsEndOfDocument(boolean isEndofDocument) {
+		this.isEndOfDocument = isEndofDocument;
+	}
+	
 	/**
 	 * Gibt das ausgelesene Nachrichtenportal zur&uuml;ck.
 	 * @return	Nachrichtenportal
@@ -171,7 +175,10 @@ public class NewsContentHandler implements ContentHandler {
 	 * @return 230 Zeichen langer Artikel-Teaser
 	 */
 	public String getTeaser() {
-		return getText().substring(0, 230)+"...";
+		if(getText().length() > 230)
+			return getText().substring(0, 230)+"...";
+		else
+			return getText()+"...";
 	}
 
 	/**

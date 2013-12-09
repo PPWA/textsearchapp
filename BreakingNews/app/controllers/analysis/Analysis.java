@@ -1,49 +1,41 @@
 package controllers.analysis;
 
-import java.io.File;
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Random;
 
 import org.apache.commons.codec.binary.Hex;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
 import org.apache.lucene.document.LongField;
+import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
-import org.apache.lucene.index.IndexWriterConfig;
-import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
-import org.apache.lucene.store.Directory;
-import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
+import controllers.Application;
 import controllers.preparation.Search;
 
+/**
+ * 
+ * 
+ * @author Sebastian Mandel
+ * @version 1.0
+ */
 public class Analysis {
-
-	private static Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_46);
+	
 	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
 
-	public static IndexWriter getWriter() throws Exception {
-		Directory dir = FSDirectory.open(new File(Search.indexPath));
-		IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,
-				analyzer);
-		iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
-		return new IndexWriter(dir, iwc);
-	}
-
 	public static void addNewDocument(String title, Date publicationDate,
-			String urlsource, String urlpicture, String text, String teaser, String newsPortal) {
+			String urlsource, String urlpicture, String text, String teaser,
+			String newsPortal) {
 		String oldTopicHash = "";
 		int i = 1;
 		String isNew = "1";
@@ -51,450 +43,96 @@ public class Analysis {
 		long date = Long.parseLong(df.format(publicationDate));
 		int l = 0;
 		int count = 0;
-		IndexReader reader;
-		IndexSearcher searcher;
 		Query q;
 		byte[] bytesOfMessage;
 		byte[] theDigest;
 		boolean b = true;
 		IndexWriter writer;
+		String explanation = "";
 
-		while (oldTopicHash.equals("") && i < 5) {
+		System.out.println("Beginn der Themen-Detektion ...");
+		while (oldTopicHash.equals("") && i < 4) {
 			switch (i) {
 			case 1:
 				// Requirement 060-1 - Gleicher-Titel-Regel
-				oldTopicHash = isSameTitle(title);
+				System.out.println("Pruefung Gleicher-Titel-Regel ...");
+				oldTopicHash = Algorithm.hasSimilarTitle(title);
+				explanation = "Ähnlicher Titel in anderem Artikel vorhanden.";
 				i++;
 				break;
 			case 2:
-				// Requirement 060-2 - Kein-neues-Wort-Regel
-				oldTopicHash = isNoNewWord(text);
+				// Requirement 060-3 - Mehr-als Fünf-Seltene-Regel
+				System.out.println("Pruefung Mehr-als-fuenf-Seltene-Regel ...");
+				oldTopicHash = Algorithm.hasSimilarRareWords(text);
+				explanation = "Ähnliche Zusammenstellung seltener Begriffe in anderem Artikel vorhanden.";
 				i++;
 				break;
 			case 3:
-				// Requirement 060-3 - Mehr-als Fünf-Seltene-Regel
-				oldTopicHash = areMoreThanFive(text);
-				i++;
-				break;
-			case 4:
 				// Requirement 060-4 - Zwei-bis-fünf-Seltene-Regel
-				oldTopicHash = hasCloseVectorSpace(text);
+				System.out.println("Pruefung Zwei-bis-fuenf-Seltene-Regel ...");
+				oldTopicHash = Algorithm.hasSimilarBody(text);
+				explanation = "Geringe Distanz des Nachrichtentextes zu anderem Artikel.";
 				i++;
 				break;
 			}
 		}
 		if (oldTopicHash.equals("")) {
+			System.out.println("Neues Thema gefunden!");
+			explanation = "";
 			isNew = Search.NEWTOPICQUERY;
-
-			try {
+	
 				while (b) {
 					Random random = new Random();
 					l = random.nextInt(1000);
-					bytesOfMessage = ("" + l).getBytes("UTF-8");
-					MessageDigest md = MessageDigest.getInstance("MD5");
-					theDigest = md.digest(bytesOfMessage);
-					topicHash = new String(Hex.encodeHex(theDigest)).substring(
-							0, 6);
+					try {
+						bytesOfMessage = ("" + l).getBytes("UTF-8");
+						MessageDigest md = MessageDigest.getInstance("MD5");
+						theDigest = md.digest(bytesOfMessage);
+						topicHash = new String(Hex.encodeHex(theDigest)).substring(0, 6);
+					} catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
+						System.out.println("Erzeugung des Topic-Hashes fehlgeschlagen.");
+					}
 
-					reader = DirectoryReader.open(FSDirectory.open(new File(
-							Search.indexPath)));
-					searcher = new IndexSearcher(reader);
-					q = new QueryParser(Version.LUCENE_46, "topichash",
-							analyzer).parse(topicHash);
-					count = searcher.search(q, 1).totalHits;
-
+					try {
+						q = new QueryParser(Version.LUCENE_46, "topichash", Application.getAnalyzer()).parse(topicHash);
+						count = Application.getSearcher().search(q, 1).totalHits;
+						Application.getReader().close();
+					} catch (Exception e) {}
+					
 					if (count > 0) {
 						l++;
 					} else {
-						b = false;
+						b = false; 
 					}
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+					System.out.println("Erzeuge neuen Topic-Hash: "+ topicHash);
+				}			
 		} else {
+			System.out.println("Thema bereits vorhanden.");
 			isNew = Search.OLDTOPICQUERY;
 			topicHash = oldTopicHash;
 		}
 
 		Document doc = new Document();
+		System.out.println("Lege Artikel im Index ab ...");
 		try {
-			//TODO Bessere Indexierung (+ generelles Verständnis), vor allem Volltext
-			//TODO Explanation?
-			//TODO Funktioniert das auch so? Andere Klassensturktur für Methoden
-			//TODO JavaDoc
-			//TODO 4 Funktionen implementieren
-			//TODO systems.out.printlns für Systemprozesse einfügen
-			doc.add(new StringField("isNew", isNew, Field.Store.YES));
+			doc.add(new StringField("isNew", isNew, Field.Store.YES)); // StringField = Field.Index.NOT_ANALYZED
 			doc.add(new StringField("topichash", topicHash, Field.Store.YES));
-			doc.add(new StringField("title", title, Field.Store.YES));
-			doc.add(new TextField("teaser", teaser, Field.Store.YES));
-			doc.add(new TextField("text", text, Field.Store.YES));
+			doc.add(new TextField("title", title, Field.Store.YES)); // TextField = Field.Index.ANALYZED
+			doc.add(new StringField("teaser", teaser, Field.Store.YES));
+			doc.add(new TextField("text", text, Field.Store.NO)); 
 			doc.add(new LongField("date", date, Field.Store.YES));
 			doc.add(new StringField("newsportal", newsPortal, Field.Store.YES));
-			doc.add(new StringField("urlsource", urlsource, Field.Store.YES));
-			doc.add(new StringField("urlpicture", urlpicture, Field.Store.YES));
-			writer = getWriter();
+			doc.add(new StoredField("urlsource", urlsource)); // StoredField = Field.Index.NO, Field.Store.YES
+			doc.add(new StoredField("urlpicture", urlpicture));
+			doc.add(new StoredField("explanation", explanation));
+
+			writer = Application.getWriter();
 			writer.addDocument(doc);
 			writer.close();
+			Application.getDir().close();
+			System.out.println("Artikel im Index gespeichert!");
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Artikel konnte nicht im Index gespeichert werden.");
 		}
 	}
-
-	public static String isSameTitle(String title) {
-		String topicHash = "";
-
-		return topicHash;
-	}
-
-	public static String isNoNewWord(String text) {
-		String topicHash = "";
-
-		return topicHash;
-	}
-
-	public static String areMoreThanFive(String text) {
-		String topicHash = "";
-
-		return topicHash;
-	}
-
-	public static String hasCloseVectorSpace(String text) {
-		String topicHash = "";
-
-		return topicHash;
-	}
-
-	/*
-	 * public static void test(){ try { dir = FSDirectory.open(new
-	 * File("index")); Analyzer analyzer = new
-	 * StandardAnalyzer(Version.LUCENE_46); iwc = new
-	 * IndexWriterConfig(Version.LUCENE_46, analyzer);
-	 * iwc.setOpenMode(OpenMode.CREATE);
-	 * 
-	 * Document doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "1", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch1",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311191200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); IndexWriter writer = new
-	 * IndexWriter(dir, iwc); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "1", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch2",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311161200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "1", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch3",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311141200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "1", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch4",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311121200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "1", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch5",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311111200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "1", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch6",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311191200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "1", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch7",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311081200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "1", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch8",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311071200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "1", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch9",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311061200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "1", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch10",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311051200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * //------------old------------------------- doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "0", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch1",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311191200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "0", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch2",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311161200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "0", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch3",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311141200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "0", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch4",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311121200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "0", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch5",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311111200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "0", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch6",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311191200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "0", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch7",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311081200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "0", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch8",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311071200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "0", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch9",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311061200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * doc = new Document();
-	 * 
-	 * doc.add(new StringField("isNew", "0", Field.Store.YES)); doc.add(new
-	 * StringField("topichash", "gC73x8", Field.Store.YES)); doc.add(new
-	 * StringField("title",
-	 * "Bücher-Krise: Chinas Verlage produzieren direkt für den Ramsch10",
-	 * Field.Store.YES)); doc.add(new StringField("teaser",
-	 * "Heute kam es in ...", Field.Store.YES)); doc.add(new LongField("date",
-	 * 201311051200L, Field.Store.YES)); doc.add(new StringField("newsportal",
-	 * "Welt Online", Field.Store.YES)); doc.add(new StringField("urlsource",
-	 * "http://www.welt.de/kultur/literarischewelt/article120673225/Chinas-Verlage-produzieren-direkt-fuer-den-Ramsch.html"
-	 * , Field.Store.YES)); doc.add(new StringField("urlpicture",
-	 * "http://img.welt.de/img/literarischewelt/crop120673224/875209918-ci3x2s-w260/163625140.jpg"
-	 * , Field.Store.YES)); doc.add(new StringField("explanation",
-	 * "Neue Wörter ...", Field.Store.YES)); writer.addDocument(doc);
-	 * 
-	 * writer.close(); } catch (Exception e) { } }
-	 */
 }

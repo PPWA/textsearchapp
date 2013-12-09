@@ -2,7 +2,6 @@ package controllers.preparation;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
@@ -17,8 +16,6 @@ import views.html.index;
 
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import controllers.analysis.Analysis;
 
 /**
  * Erzeugt aus den von der Klasse Search erhaltenen Ergebnissen eine Ausgabe im
@@ -48,6 +45,7 @@ public class Preparation extends Controller {
 		try {
 			return sdfS.format(sdfD.parse(LDate)) + " Uhr";
 		} catch (ParseException e) {
+			System.out.println("Formatierung von Datum fehlerhaft.");
 			return "00.00.0000 00:00 Uhr";
 		}
 	}
@@ -67,9 +65,6 @@ public class Preparation extends Controller {
 	 *         Beitr&auml;ge mit neuem Thema enth&auml;lt
 	 */
 	public static Result getNewTopics(String offsetS, String keyword) {
-		//Analysis.test();
-
-		//Analysis.addNewDocument("titel", new Date(), "bla", "bla", "bla", "bla");
 		int offset;
 		ObjectNode response = Json.newObject();
 		ObjectNode result = Json.newObject();
@@ -77,14 +72,17 @@ public class Preparation extends Controller {
 		ObjectNode article;
 		Document document;
 		List<Document> documents;
+		long timeStart = System.currentTimeMillis();
 
 		try {
 			offset = Integer.parseInt(offsetS);
 		} catch (Exception e) {
-			return ok(index.render("Fehlerhafter Parameter"));
+			System.out.println("Fehlerhafter GET-Parameter für Offset.");
+			return ok(index.render(""));
 		}
 
 		documents = Search.getDocumentsNewTopic(offset, keyword);
+		System.out.println("JSON wird erzeugt ...");
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
@@ -95,9 +93,10 @@ public class Preparation extends Controller {
 			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
 			article.put("art_topichash", document.get("topichash"));
-			article.put("art_explanation", document.get("explanation"));
 			articles.add(article);
 		}
+		String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
+		System.out.println("JSON fertiggestellt! Gesamtzeit der Operation: " + duration + " Sekunden.");
 		response.put("articles", articles);
 		return ok(response);
 	}
@@ -124,15 +123,17 @@ public class Preparation extends Controller {
 		ObjectNode article;
 		int offset;
 		List<Document> documents;
+		long timeStart = System.currentTimeMillis();
 
 		try {
 			offset = Integer.parseInt(offsetS);
 		} catch (Exception e) {
 			return ok(index.render("Fehlerhafter Parameter"));
 		}
-
+		
 		documents = Search.getDocumentsOldTopic(offset);
 
+		System.out.println("JSON wird erzeugt ...");
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
@@ -143,8 +144,11 @@ public class Preparation extends Controller {
 			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
 			article.put("art_topichash", document.get("topichash"));
+			article.put("art_explanation", document.get("explanation"));
 			articles.add(article);
 		}
+		String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
+		System.out.println("JSON fertiggestellt! Gesamtzeit der Operation:  " + duration + " Sekunden");
 		response.put("articles", articles);
 		return ok(response);
 	}
@@ -166,6 +170,9 @@ public class Preparation extends Controller {
 		Document document;
 		ObjectNode article;
 		List<Document> documents = Search.getSimilarDocuments(topicHash);
+		long timeStart = System.currentTimeMillis();
+		
+		System.out.println("JSON wird erzeugt ...");
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
@@ -178,6 +185,8 @@ public class Preparation extends Controller {
 			article.put("art_topichash", document.get("topichash"));
 			articles.add(article);
 		}
+		String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
+		System.out.println("JSON fertiggestellt! Gesamtzeit der Operation:  " + duration + " Sekunden");
 		response.put("articles", articles);
 		return ok(response);
 	}
@@ -196,13 +205,17 @@ public class Preparation extends Controller {
 		ArrayNode newsportals = result.arrayNode();
 		ObjectNode newsportal;
 		List<Newsportal> newsportalList = Search.getNewsportalList();
-
+		long timeStart = System.currentTimeMillis();
+		
+		System.out.println("JSON wird erzeugt ...");
 		for (int i = 0; i < newsportalList.size(); i++) {
 			newsportal = Json.newObject();
 			newsportal.put("np_name", newsportalList.get(i).getName());
 			newsportal.put("np_count", newsportalList.get(i).getAnzahl());
 			newsportals.add(newsportal);
 		}
+		String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
+		System.out.println("JSON fertiggestellt! Gesamtzeit der Operation:  " + duration + " Sekunden");
 		response.put("newsportals", newsportals);
 		return ok(response);
 	}
