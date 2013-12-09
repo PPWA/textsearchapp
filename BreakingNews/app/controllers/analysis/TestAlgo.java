@@ -93,8 +93,8 @@ public class TestAlgo {
 				TopDocs topDocs = searcher.search(booleanQuery, 1);
 				System.out.println("Gefunden in "+topDocs.totalHits+" Dokumenten.");
 				
-//				if(topDocs.totalHits <= rareRangeMax) {
-				if(true) {
+				if(topDocs.totalHits <= rareRangeMax) {
+//				if(true) {
 					rareWords.add(tokens.get(i));
 					
 //					ScoreDoc[] hits = topDocs.scoreDocs;
