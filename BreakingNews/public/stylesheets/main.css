@@ -73,6 +73,7 @@ body {
         .art_img { 
             width:160px; height:120px;
             float:left;
+            background-image:url(../images/art_bg.png);
         }
         .art_main { float:left; padding:5px; }
         .art_newsportal { margin:0; }
@@ -94,6 +95,22 @@ body {
             width:280px; min-height:100px;
             float:left;
             background-color:gray;
+        }
+       
+        /* Formatierung oldArticles*/
+
+        #right_column .art_img { 
+            width:80px; height:60px;
+            float:left;
+            background-image:url(../images/art_bgklein.png);
+        }
+        
+        #right_column p.teaser { 
+            width:280px; height:30px; 
+        }
+
+        #right_column .art_time p { 
+            margin:0; color:#BBBBBB; 
         }
         
 /* Styling: */
