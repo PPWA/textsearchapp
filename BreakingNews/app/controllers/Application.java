@@ -33,7 +33,7 @@ public class Application extends Controller {
 	// inkl. StandardTokenizer, LowerCaseFilter, StopwortFilter
 	private static Analyzer analyzer = new GermanAnalyzer(Version.LUCENE_46);
 	private static File file = new File(Search.indexPath);
-	/**
+	/***
 	 * Globale Referenz auf den Reader f&uuml;r alle Suchanfragen.
 	 */
 	private static IndexReader reader;

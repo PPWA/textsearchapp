@@ -16,3 +16,5 @@ dist
 /.target
 /bin
 /index
+/index2
+/xmlFiles
