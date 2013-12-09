@@ -50,7 +50,8 @@ public class Application extends Controller {
 		return analyzer;
 	}
 
-	public static IndexReader getReader() {
+	public static IndexReader getReader() throws IOException {
+		reader = DirectoryReader.open(FSDirectory.open(file));
 		return reader;
 	}
 
@@ -59,7 +60,7 @@ public class Application extends Controller {
 	}
 
 	/**
-	 * Gibt die Startseite zur&uuml;ck, sobald eine Client diese aufruft.
+	 * Gibt die Startseite zur&uuml;ck, sobald ein Client diese aufruft.
 	 * 
 	 * @return Eine HTTP-Response mit Status-Code 200, dem MIMETYPE text/html
 	 *         und des HTML-Codes f&uuml;r die Startseite
@@ -69,7 +70,7 @@ public class Application extends Controller {
 	}
 
 	/**
-	 * &ouml;ffnet einen SuchReader auf dem angegebenen Index auf der Festplatte
+	 * &Ouml;ffnet einen SuchReader auf dem angegebenen Index auf der Festplatte
 	 * und gibt ihn zur&uuml;ck.
 	 * 
 	 * @return eine Referenz auf den SearchReader
@@ -79,7 +80,7 @@ public class Application extends Controller {
 
 	public static IndexSearcher getSearcher() {
 		try {
-			reader = DirectoryReader.open(FSDirectory.open(file));
+			getReader();
 			IndexSearcher searcher = new IndexSearcher(reader);
 			searcher.setSimilarity(sim);
 			return searcher;
@@ -99,6 +100,18 @@ public class Application extends Controller {
 		} catch (Exception e) {
 			System.out.println("Index-Verzeichnis nicht vorhanden.");
 			return null;
+		}
+	}
+	
+	/**
+	 * Gibt die Anzahl aller im Index gespeicherten Dokumente zur&uuml;ck.
+	 * @return Anzahl aller Dokumente im Index
+	 */
+	public static int getNumberOfAllDocuments() {
+		try {
+			return getReader().numDocs();
+		} catch (IOException e) {
+			return 0;
 		}
 	}
 
