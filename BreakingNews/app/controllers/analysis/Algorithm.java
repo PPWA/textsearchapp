@@ -79,7 +79,7 @@ public class Algorithm {
 				}	
 			}
 			Application.getReader().close();
-		} catch (IOException | ParseException e) {
+		} catch (IOException | ParseException | NullPointerException e) {
 			System.out.println("hasSimilarTitle fehlgeschlagen da Index nicht vorhanden.");
 		}
 		return topicHash;
