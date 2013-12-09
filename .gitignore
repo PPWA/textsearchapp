@@ -16,6 +16,7 @@ local.properties
 .settings/
 .loadpath
 /index2
+/xmlFiles
 
 # External tool builders
 .externalToolBuilders/
