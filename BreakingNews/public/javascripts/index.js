@@ -67,7 +67,7 @@ $.getJSON("/new-topics", function (data){
 			
 			'<div class="art_header">'+
 				'<a href="'+ item["art_urlsource"]+ '">' +
-					'<img class="img_rss" src="../images/rss.png" alt="" />'+
+					'<img class="img_rss" src="/assets/images/rss.png" alt="" />'+
 					'<h2>'+ item["art_title"] +'</h2>'+
 				'</a>'+
 			'</div>'
