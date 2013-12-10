@@ -1,6 +1,7 @@
 package controllers;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
@@ -82,8 +83,12 @@ public class Application extends Controller {
 	 */
 	public static int getNumberOfAllDocuments() {
 		try {
-			return 1;
-		} catch (Exception e) {
+			IndexReader reader = DirectoryReader.open(FSDirectory.open(file));
+			int temp = reader.numDocs();
+			reader.close();
+			return temp;
+		} catch (IOException e) {
+			System.out.println("Application: Can not read documents-count!");
 			return 0;
 		}
 	}
