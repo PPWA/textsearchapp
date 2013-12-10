@@ -10,6 +10,7 @@ import java.util.StringTokenizer;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
+import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -35,10 +36,10 @@ import controllers.preparation.Search;
 public class Algorithm {
 
 	// Prozentuales Vorkommen in allen Dokumenten, ab der ein Wort noch als selten gilt:
-	private final static float RARE_APPEARANCE = (float) 0.15; // = 15%
+	private final static float RARE_APPEARANCE = (float) 0.05; // = 5%
 	
 	// Anzahl der seltenen Wörter, ab der ein Dokument als selbes Thema angesehen wird:
-	private final static int RARE_WORDS_IN_DOC = 5;
+	private final static int RARE_WORDS_IN_DOC = 15;
 	
 	private static ArrayList<String> rareWords = new ArrayList<String>();
 	
@@ -103,6 +104,9 @@ public class Algorithm {
 		// bei Fund Abbruch und dessen topichash
 
 		int rareRangeMax = (int) (Application.getNumberOfAllDocuments()*RARE_APPEARANCE);
+		if(rareRangeMax<1)
+			rareRangeMax = 1;
+//		System.out.println("rareRangeMax: "+rareRangeMax);
 		ArrayList<String> tokens = tokenizeAndRemoveStopWords(text);
 		
 		IndexSearcher searcher = Application.createSearcher();
@@ -123,29 +127,41 @@ public class Algorithm {
 			
 			try {
 				TopDocs topDocs = searcher.search(booleanQuery, 1);
+				if(topDocs.totalHits>0) {
+					topDocs = searcher.search(booleanQuery, topDocs.totalHits);
 				
-				if(topDocs.totalHits <= rareRangeMax) {
-					rareWords.add(tokens.get(i));
-					
-					ScoreDoc[] hits = topDocs.scoreDocs;
-					for(int j=0; j<hits.length; j++) {
-						int temp = 0;
+					if(topDocs.totalHits <= rareRangeMax) {
+	//				if(true) {
+						rareWords.add(tokens.get(i));
+	//					System.out.println("Seltenes Wort: "+tokens.get(i));
 						
-						if(maybeSimilarDocs.get(hits[j].doc)!=null)
-							temp = maybeSimilarDocs.get(hits[j].doc);
+						ScoreDoc[] hits = topDocs.scoreDocs;
+						for(int j=0; j<hits.length; j++) {
+							int temp = 0;
 							
-						
-						if(++temp >= RARE_WORDS_IN_DOC) {
-							System.out.println("Mehr als "+RARE_WORDS_IN_DOC+" seltene Worte in Dokument >>> Kein neues Thema.");
-							searcher.getIndexReader().close();
-							return searcher.doc(hits[0].doc).get("topichash");
+							if(maybeSimilarDocs.get(hits[j].doc)!=null)
+								temp = maybeSimilarDocs.get(hits[j].doc);
+								
+							
+							if(++temp >= RARE_WORDS_IN_DOC) {
+								System.out.println("Mehr als "+RARE_WORDS_IN_DOC+" seltene Worte in Dokument >>> Kein neues Thema.");
+								String hash = searcher.doc(hits[j].doc).get("topichash");
+								System.out.println("Similar with "+searcher.doc(hits[j].doc).get("title"));
+								searcher.getIndexReader().close();
+								return hash;
+							}
+	//						System.out.println("Doc #"+hits[j].doc+" hat jetzt "+temp+" seltene Begriffe.");
+							maybeSimilarDocs.put(hits[j].doc, temp);
 						}
-						maybeSimilarDocs.put(hits[j].doc, temp);
+					} else {
+//						System.out.println("Nicht selten, weil "+topDocs.totalHits+" totalHits > Range "+rareRangeMax);
 					}
+				} else {
+//					System.out.println("In keinem Dokument gefunden...");
 				}
 				
-			} catch (Exception e) {
-
+			} catch (IOException | NullPointerException e) {
+				System.out.println("hasSimilarRareWords fehlgeschlagen da Index nicht vorhanden.");
 			} 
 		}
 		try {
@@ -170,13 +186,24 @@ public class Algorithm {
 	    TokenStream tokenStream = new StandardTokenizer(
 	            Version.LUCENE_46, new StringReader(input));
 	    tokenStream = new StopFilter(Version.LUCENE_46, tokenStream, ((GermanAnalyzer)Application.getAnalyzer()).getStopwordSet());
-//	    tokenStream = new PorterStemFilter(tokenStream);
+	    tokenStream = new PorterStemFilter(tokenStream);
 	    
 	    ArrayList<String> terms = new ArrayList<String>();
 	    try {
 	    	tokenStream.reset();
 			while (tokenStream.incrementToken()) {
-			    terms.add(tokenStream.getAttribute(CharTermAttribute.class).toString());
+			    String tok = tokenStream.getAttribute(CharTermAttribute.class).toString();
+			    boolean addFlag = true;
+			    // Avoid storing the same token more than 1 time:
+				for(int i=0; i<terms.size(); i++) {
+					if(tok.equals(terms.get(i))) {
+						addFlag = false;
+						break;
+					}
+				}
+				
+				if(addFlag)
+					terms.add(tokenStream.getAttribute(CharTermAttribute.class).toString());
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

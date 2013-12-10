@@ -55,21 +55,21 @@ public class Analysis {
 			switch (i) {
 			case 1:
 				// Requirement 060-1 - Gleicher-Titel-Regel
-				System.out.println("Pruefung Gleicher-Titel-Regel ...");
+				System.out.println("(1) Pruefung Gleicher-Titel-Regel ...");
 				oldTopicHash = Algorithm.hasSimilarTitle(title);
 				explanation = "Ähnlicher Titel in anderem Artikel vorhanden.";
 				i++;
 				break;
 			case 2:
 				// Requirement 060-3 - Mehr-als Fünf-Seltene-Regel
-				System.out.println("Pruefung Mehr-als-fuenf-Seltene-Regel ...");
+				System.out.println("(2) Pruefung Mehr-als-fuenf-Seltene-Regel ...");
 				oldTopicHash = Algorithm.hasSimilarRareWords(text);
 				explanation = "Ähnliche Zusammenstellung seltener Begriffe in anderem Artikel vorhanden.";
 				i++;
 				break;
 			case 3:
 				// Requirement 060-4 - Zwei-bis-fünf-Seltene-Regel
-				System.out.println("Pruefung Zwei-bis-fuenf-Seltene-Regel ...");
+				System.out.println("(3) Pruefung Zwei-bis-fuenf-Seltene-Regel ...");
 				oldTopicHash = Algorithm.hasSimilarBody(text);
 				explanation = "Geringe Distanz des Nachrichtentextes zu anderem Artikel.";
 				i++;

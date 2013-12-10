@@ -37,27 +37,26 @@ function init(){
 
 
 function oldArticles(){
-$.getJSON("/old-topics", function (data){ 
-	$.each(data.articles, function(i,item) { 
+	$("#old_news").html("");
+	$.getJSON("/old-topics", function (data){ 
+		$.each(data.articles, function(i,item) { 
+		
+			var oldArticle = " ";
+			
+			oldArticle = 
+			
+				'<div class="old_art">'+
+					'<a href="'+ item["art_urlsource"]+ '">'+
+					'<img class="img_rss" src="/assets/images/rss.png" alt="" />'+
+					'<h2>'+ item["art_title"] +'</h2>'+
+					'</a>'+
+					'<p class="old_portal">'+ item["art_newportal"] +'</p>'+
+					'<p class="old_date">'+ item["art_date"]+ '<p>'+
+					'<div style="clear:both;"></div>'+
+				'</div>'+
+				'<hr />';		
 	
-		var oldArticle = " ";
-		
-		oldArticle = 
-		
-			'<div class="old_art">'+
-				'<a href="'+ item["art_urlsource"]+ '">'+
-				'<img class="img_rss" src="/assets/images/rss.png" alt="" />'+
-				'<h2>'+ item["art_title"] +'</h2>'+
-				'</a>'+
-				'<p class="old_portal">'+ item["art_newportal"] +'</p>'+
-				'<p class="old_date">'+ item["art_date"]+ '<p>'+
-				'<div style="clear:both;"></div>'+
-			'</div>'+
-			'<hr />';		
-
-		$("#old_news").append(oldArticle);
-		
-
+			$("#old_news").append(oldArticle);
 		}); 
 	});
 }

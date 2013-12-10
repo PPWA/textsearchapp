@@ -57,7 +57,9 @@ public class Acquisition {
 				handl = new NewsContentHandler();
 				
 				System.out.println("\nAcquisition.java: New File: "+newXMLFiles.get(i));
-				readXMLFile(DIR+newXMLFiles.get(i), handl);
+				if(!readXMLFile(DIR+newXMLFiles.get(i), handl))
+					continue;
+				
 				while(!handl.hasStoppedReading()) {
 					try {
 						Thread.sleep(1000);
@@ -66,8 +68,14 @@ public class Acquisition {
 					}
 				}
 				
+	//			showMeWhatYouGot(handl); 	// for testing
+				
+				String title = "Kein Titel";
+				if(!handl.getTitle().equals(""))
+					title = handl.getTitle();
+				
 				Analysis.addNewDocument(
-						handl.getTitle(),
+						title,
 						handl.getPublicationDate(),
 						handl.getUrlSource(),
 						handl.getUrlPicture(),
@@ -143,7 +151,7 @@ public class Acquisition {
 	 * @param handl
 	 * 			NewsContentHandler, welcher das Auslesen &uuml;bernimmt und im Anschluss die gelesenen Informationen enth&auml;lt
 	 */
-	private static void readXMLFile(String pathToFile, NewsContentHandler handl) {
+	private static boolean readXMLFile(String pathToFile, NewsContentHandler handl) {
 		try {
 			long timeStart = System.currentTimeMillis();
 			System.out.println("Acquisition.java: Start reading XML...");
@@ -160,6 +168,7 @@ public class Acquisition {
 			
 			String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
 			System.out.println("Acquisition.java: Succesfully read XML in "+duration+" seconds!");
+			return true;
 		} catch (SAXException e) {
 			System.out.println("Acquisition.java: SAX-Error while parsing "+pathToFile);
 			handl.setIsEndOfDocument(true);
@@ -170,6 +179,7 @@ public class Acquisition {
 			e.printStackTrace();
 			System.out.println("Acquisition.java: Input/Output-Error while parsing "+pathToFile);
 		}
+		return false;
 	}
 	
 	/**
@@ -185,5 +195,19 @@ public class Acquisition {
 		else System.out.println("Acquisition.java: Failed to delete "+pathToFile);
 		
 		return deleteSuccess;
+	}
+	
+	/**
+	 * F&uuml;r Testzwecke: Gibt alle vom NewsContentHandler eingelesenen Daten in der Console aus
+	 * @param handl
+	 */
+	private static void showMeWhatYouGot(NewsContentHandler handl) {
+		System.out.println("Title: "+handl.getTitle());
+		System.out.println("PubDate: "+handl.getPublicationDate());
+		System.out.println("Url: "+handl.getUrlSource());
+		System.out.println("Pic: "+handl.getUrlPicture());
+//		System.out.println("Text: "+handl.getText());
+		System.out.println("Teaser: "+handl.getTeaser());
+		System.out.println("Portal: "+handl.getNewsPortal());
 	}
 }

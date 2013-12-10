@@ -197,8 +197,14 @@ public class NewsContentHandler implements ContentHandler {
 				pubDate = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.ENGLISH).parse(publicationDate);
 				System.out.println("NewsContentHandler.java: Next try parsing date succeeded.");
 			} catch (ParseException e1) {
-				System.out.println("NewsContentHandler.java: Could not parse date, again! Using current date.");
-				pubDate = new Date();
+				System.out.println("NewsContentHandler.java: Could not parse date, again!");
+				try {
+					pubDate = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.ENGLISH).parse(publicationDate);
+					System.out.println("NewsContentHandler.java: Next try parsing date succeeded.");
+				} catch (ParseException e2) {
+					System.out.println("NewsContentHandler.java: Could not parse date, again! Using current date.");
+					pubDate = new Date();
+				}
 			}
 		}
 		return pubDate;
