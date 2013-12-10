@@ -45,10 +45,10 @@ public class Analysis {
 		Query q;
 		byte[] bytesOfMessage;
 		byte[] theDigest;
-		boolean b = true;
 		String explanation = "";
 		IndexSearcher searcher;
 		IndexWriter writer;
+		int x=0;
 
 		System.out.println("Beginn der Themen-Detektion ...");
 		while (oldTopicHash.equals("") && i < 4) {
@@ -81,9 +81,10 @@ public class Analysis {
 			explanation = "";
 			isNew = Search.NEWTOPICQUERY;
 	
-				while (b) {
+				while (true) {
 					try {
-						bytesOfMessage = (title).getBytes("UTF-8");
+						count = 0;
+						bytesOfMessage = (title+publicationDate.toString()+x).getBytes("UTF-8");
 						MessageDigest md = MessageDigest.getInstance("MD5");
 						theDigest = md.digest(bytesOfMessage);
 						topicHash = new String(Hex.encodeHex(theDigest)).substring(0, 6);
@@ -99,10 +100,12 @@ public class Analysis {
 					} catch (Exception e) {
 						System.out.println("Index-Verzeichnis nicht vorhanden.");
 					}
-					
 					if (count == 0) {
-						b = false;
-					} 
+						break;
+					} else
+					{
+						x++;
+					}
 				}	
 				System.out.println("Erzeuge neuen Topic-Hash: "+ topicHash);
 		} else {

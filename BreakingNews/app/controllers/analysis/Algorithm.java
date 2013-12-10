@@ -70,7 +70,7 @@ public class Algorithm {
 			booleanQuery.add(query1, BooleanClause.Occur.MUST);
 			booleanQuery.add(query2, BooleanClause.Occur.MUST);
 			hits = searcher.search(booleanQuery, 1).scoreDocs;
-
+			System.out.println(queryTitle);
 			if (hits.length == 1) {
 				docTitle = searcher.doc(hits[0].doc).get("title");
 				queryTokenizer = new StringTokenizer(queryTitle);
@@ -85,7 +85,6 @@ public class Algorithm {
 						}
 					}
 				}
-
 				if (i >= 3) {
 					topicHash = searcher.doc(hits[0].doc).get("topichash");
 					System.out.println("Aehnlicher Titel gefunden: " + topicHash);
