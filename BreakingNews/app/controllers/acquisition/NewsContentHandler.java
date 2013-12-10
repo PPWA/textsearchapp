@@ -2,6 +2,7 @@ package controllers.acquisition;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
@@ -203,7 +204,7 @@ public class NewsContentHandler implements ContentHandler {
 					System.out.println("NewsContentHandler.java: Next try parsing date succeeded.");
 				} catch (ParseException e2) {
 					System.out.println("NewsContentHandler.java: Could not parse date, again! Using current date.");
-					pubDate = new Date();
+					pubDate = Calendar.getInstance().getTime();
 				}
 			}
 		}
