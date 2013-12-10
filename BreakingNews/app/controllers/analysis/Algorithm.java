@@ -52,7 +52,6 @@ public class Algorithm {
 		// Häufigkeit: gering
 		// Folge: Neues Thema geht unter
 		String topicHash = "";
-		TopDocs topDocs;
 		ScoreDoc[] hits = null;
 		IndexSearcher searcher = Application.getSearcher();
 		Query query1;
@@ -79,7 +78,6 @@ public class Algorithm {
 					currentQueryToken = queryTokenizer.nextToken();
 					docTokenizer = new StringTokenizer(docTitle);
 					while (docTokenizer.hasMoreTokens()) {
-//						System.out.println("test");
 						if (currentQueryToken.equals(docTokenizer.nextToken())) {
 							i++;
 							break;
@@ -145,8 +143,8 @@ public class Algorithm {
 					}
 				}
 				
-			} catch (IOException | NullPointerException e) {
-				
+			} catch (Exception e) {
+
 			} 
 		}
 

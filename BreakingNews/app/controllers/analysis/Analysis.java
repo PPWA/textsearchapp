@@ -15,7 +15,6 @@ import org.apache.lucene.document.LongField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
-import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.Version;
@@ -47,7 +46,6 @@ public class Analysis {
 		byte[] bytesOfMessage;
 		byte[] theDigest;
 		boolean b = true;
-		IndexWriter writer;
 		String explanation = "";
 
 		System.out.println("Beginn der Themen-Detektion ...");
@@ -117,7 +115,6 @@ public class Analysis {
 		Document doc = new Document();
 		System.out.println("Lege Artikel im Index ab ...");
 		try {
-			System.out.println(isNew);
 			doc.add(new StringField("isNew", isNew, Field.Store.YES)); // StringField = Field.Index.NOT_ANALYZED
 			doc.add(new StringField("topichash", topicHash, Field.Store.YES));
 			doc.add(new TextField("title", title, Field.Store.YES)); // TextField = Field.Index.ANALYZED
