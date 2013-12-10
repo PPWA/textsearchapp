@@ -94,8 +94,28 @@ body {
         #right_column {
             width:280px; min-height:100px;
             float:left;
-            background-color:gray;
         }
+        #newsportals {
+			margin-bottom:20px;
+			background-color:#ffffff;
+		}
+		#portals {
+			padding-bottom:1px;
+		}
+		.portal {
+			padding:3px;
+			margin:5px;
+			border-radius:2px;
+			background-color:#FAA96F;
+		}
+		.portal p { margin:0; }
+		
+		#old_news {
+			padding:5px;
+		}
+		.old_art a h2 { color:#000; margin:0; text-align:center; }
+		.old_date { float:left; font-size:0.8em; }
+		.old_portal { float:right; font-size:0.8em; }
        
         /* Formatierung oldArticles*/
 

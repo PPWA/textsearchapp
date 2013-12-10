@@ -1,5 +1,5 @@
-$(init); 
-$(oldArticles)
+init();
+refresh();
 
 function init(){ 
 	$("#main").html("");	
@@ -31,8 +31,8 @@ function init(){
 			$("#main").append("<article>" + curArticle + "</article>");
 
 			}); 
-		}); 
-	 
+	}); 
+	oldArticles();
 }
 
 
@@ -42,28 +42,20 @@ $.getJSON("/old-topics", function (data){
 	
 		var oldArticle = " ";
 		
-		oldArticle = 				
-			
-			'<div class="art_header">'+
-				'<a href="'+ item["art_urlsource"]+ '">' +
-					'<img class="img_rss" src="/assets/images/rss.png" alt="" />'+
-					'<h2>'+ item["art_title"] +'</h2>'+
+		oldArticle = 
+		
+			'<div class="old_art">'+
+				'<a href="'+ item["art_urlsource"]+ '">'+
+				'<img class="img_rss" src="/assets/images/rss.png" alt="" />'+
+				'<h2>'+ item["art_title"] +'</h2>'+
 				'</a>'+
-			'</div>'
-			+ 	
-			'<img class="art_img" src="'+ item["art_urlpicture"] + '" alt="" />'
-			+ 
-			'<div class="art_main">'+
-				'<a href="'+ item["art_urlsource"]+ '" >'+'<p class="art_newsportal">'+ item["art_newportal"] +'</p>'+'</a>'+
-				'<p class="teaser">'+ item["art_teaser"] +'</p>'+
-			'</div>'
-			+ 
-			'<div class="art_time">'+'<p>'+ item["art_date"]+ '</p>'+'</div>'+ '<br>'+
+				'<p class="old_portal">'+ item["art_newportal"] +'</p>'+
+				'<p class="old_date">'+ item["art_date"]+ '<p>'+
+				'<div style="clear:both;"></div>'+
+			'</div>'+
+			'<hr />';		
 
-			'<div style="clear:both;">'+'</div>';
-			
-
-		$("#right_column").append("<div>" + oldArticle + "</div>");
+		$("#old_news").append(oldArticle);
 		
 
 		}); 
@@ -76,5 +68,5 @@ function refresh(){
 			init();
 		}
 		
-		}); 
-	}
+	}); 
+}

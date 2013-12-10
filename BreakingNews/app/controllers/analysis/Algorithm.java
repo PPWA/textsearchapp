@@ -79,7 +79,7 @@ public class Algorithm {
 					currentQueryToken = queryTokenizer.nextToken();
 					docTokenizer = new StringTokenizer(docTitle);
 					while (docTokenizer.hasMoreTokens()) {
-						System.out.println("test");
+//						System.out.println("test");
 						if (currentQueryToken.equals(docTokenizer.nextToken())) {
 							i++;
 							break;
@@ -114,7 +114,6 @@ public class Algorithm {
 		Map<Integer, Integer> maybeSimilarDocs = new HashMap<Integer, Integer>();
 		
 		for(int i=0; i<tokens.size(); i++) {
-			System.out.println("\n\""+tokens.get(i)+"\":");
 			BooleanQuery booleanQuery = new BooleanQuery();
 			try {
 				Query query1 = new QueryParser(Version.LUCENE_46, "text",Application.getAnalyzer()).parse(tokens.get(i));
@@ -126,7 +125,6 @@ public class Algorithm {
 			
 			try {
 				TopDocs topDocs = searcher.search(booleanQuery, 1);
-				System.out.println("Gefunden in "+topDocs.totalHits+" Dokumenten.");
 				
 				if(topDocs.totalHits <= rareRangeMax) {
 					rareWords.add(tokens.get(i));
@@ -147,8 +145,8 @@ public class Algorithm {
 					}
 				}
 				
-			} catch (IOException e) {
-				e.printStackTrace();
+			} catch (IOException | NullPointerException e) {
+				
 			} 
 		}
 
