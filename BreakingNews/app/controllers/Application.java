@@ -1,7 +1,6 @@
 package controllers;
 
 import java.io.File;
-import java.io.IOException;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
@@ -13,7 +12,6 @@ import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.similarities.DefaultSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
-import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
@@ -32,12 +30,9 @@ public class Application extends Controller {
 	// inkl. StandardTokenizer, LowerCaseFilter, StopwortFilter
 	private static Analyzer analyzer = new GermanAnalyzer(Version.LUCENE_46);
 	private static File file = new File("index2");
-	private static Directory dir;
 	/***
 	 * Globale Referenz auf den Reader f&uuml;r alle Suchanfragen.
 	 */
-	private static IndexReader reader;
-	private static IndexWriter writer;
 
 	private static Similarity sim = new DefaultSimilarity() {
 		public float idf(long i, long i1) {
@@ -53,10 +48,9 @@ public class Application extends Controller {
 	 * @throws Exception
 	 *             wenn der spezifizierte Index nicht vorhanden ist.
 	 */
-	public static IndexSearcher getSearcher() {
+	public static IndexSearcher createSearcher() {
 		try {
-			dir = FSDirectory.open(file);
-			reader = DirectoryReader.open(dir);
+			IndexReader reader = DirectoryReader.open(FSDirectory.open(file));
 			IndexSearcher searcher = new IndexSearcher(reader);
 			searcher.setSimilarity(sim);
 			return searcher;
@@ -66,13 +60,11 @@ public class Application extends Controller {
 		}
 	}
 	
-	public static IndexWriter getWriter() {
+	public static IndexWriter createWriter() {
 		try {
-			dir = FSDirectory.open(file);
-			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,
-					analyzer).setSimilarity(sim);
+			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,analyzer).setSimilarity(sim);
 			iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
-			writer = new IndexWriter(dir, iwc);
+			IndexWriter writer = new IndexWriter(FSDirectory.open(file), iwc);
 			return writer;
 		} catch (Exception e) {
 			System.out.println("Index-Verzeichnis nicht vorhanden.");
@@ -80,31 +72,17 @@ public class Application extends Controller {
 		}
 	}
 	
-	public static void closeAll() {	
-		try {
-			if (writer != null) writer.close();
-			if (reader != null) reader.close();
-			if (dir != null) dir.close();	
-		} catch (IOException e) {
-			System.out.println("Fehler beim Schließen der Workers.");
-		}
-	}
-
 	public static Analyzer getAnalyzer() {
 		return analyzer;
 	}
 	
-	public static IndexReader getReader() {
-		return reader;
-	}
-
 	/**
 	 * Gibt die Anzahl aller im Index gespeicherten Dokumente zur&uuml;ck.
 	 * @return Anzahl aller Dokumente im Index
 	 */
 	public static int getNumberOfAllDocuments() {
 		try {
-			return reader.numDocs();
+			return 1;
 		} catch (Exception e) {
 			return 0;
 		}

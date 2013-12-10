@@ -189,7 +189,7 @@ public class Search {
 			Sort sort = new Sort(new SortField("date", SortField.Type.STRING,
 					true));
 			ScoreDoc[] hits = null;
-			IndexSearcher searcher = Application.getSearcher();
+			IndexSearcher searcher = Application.createSearcher();
 			
 			// Erstellung der Suchanfrage
 			System.out.println("Suchanfrage an Lucene wird durchgefuehrt ...");
@@ -207,10 +207,11 @@ public class Search {
 				Document d = searcher.doc(docId);
 				documents.add(d);
 			}
-			Application.closeAll();
+			searcher.getIndexReader().close();
 			System.out.println("Suchergebnisse ermittelt!");
 			return documents;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("Fehler beim Ausfuehren der Suchanfrage");
 			return new ArrayList<Document>();
 		}
@@ -233,20 +234,19 @@ public class Search {
 		try {
 			List<Document> documents = new ArrayList<Document>();
 			ScoreDoc[] hits = null;
-			Sort sort = new Sort(new SortField("date", SortField.Type.LONG,
-					true));
-			IndexSearcher searcher = Application.getSearcher();
+			Sort sort = new Sort(new SortField("date", SortField.Type.LONG,true)); // Sortierung
+			IndexSearcher searcher = Application.createSearcher();
 
 			// Erstellung der Suchanfrage
 			System.out.println("Suchanfrage an Lucene wird durchgefuehrt ...");
 			BooleanQuery booleanQuery = new BooleanQuery();
-			Query query1 = new TermQuery(new Term(queryfield, querystr));
-			Query query2 = NumericRangeQuery.newLongRange("date",
-					getLowerBound(), getUpperBound(), true, true);
+			Query query1 = new TermQuery(new Term(queryfield, querystr)); // isNew
+			Query query2 = NumericRangeQuery.newLongRange("date", 
+					getLowerBound(), getUpperBound(), true, true); // Datum
 			booleanQuery.add(query1, BooleanClause.Occur.MUST);
 			booleanQuery.add(query2, BooleanClause.Occur.MUST);
 			if (!keyword.equals("")) {
-				Query query3 = new TermQuery(new Term("text", keyword));
+				Query query3 = new TermQuery(new Term("text", keyword)); //Suchbegriff
 				booleanQuery.add(query3, BooleanClause.Occur.MUST);
 			}
 			if (offset == 0) {
@@ -274,7 +274,7 @@ public class Search {
 				lastDoc = null;
 				end = true;
 			}
-			Application.closeAll();
+			searcher.getIndexReader().close();
 			if (k == NEWTOPICQUERY) {
 				lastDocNew = lastDoc;
 				endNew = end;

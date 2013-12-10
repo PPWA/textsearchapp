@@ -53,7 +53,7 @@ public class Algorithm {
 		// Folge: Neues Thema geht unter
 		String topicHash = "";
 		ScoreDoc[] hits = null;
-		IndexSearcher searcher = Application.getSearcher();
+		IndexSearcher searcher = Application.createSearcher();
 		Query query1;
 		Query query2;
 		String docTitle;
@@ -90,7 +90,7 @@ public class Algorithm {
 					System.out.println("Aehnlicher Titel gefunden: " + topicHash);
 				}	
 			}
-			Application.closeAll();
+			searcher.getIndexReader().close();
 		} catch (IOException | ParseException | NullPointerException e) {
 			System.out.println("hasSimilarTitle fehlgeschlagen da Index nicht vorhanden.");
 		}
@@ -105,7 +105,7 @@ public class Algorithm {
 		int rareRangeMax = (int) (Application.getNumberOfAllDocuments()*RARE_APPEARANCE);
 		ArrayList<String> tokens = tokenizeAndRemoveStopWords(text);
 		
-		IndexSearcher searcher = Application.getSearcher();
+		IndexSearcher searcher = Application.createSearcher();
 		Query query2 = NumericRangeQuery.newLongRange("date",Search.getLowerBound(), Search.getUpperBound(), true, true);
 		
 		// Integer docId, int sameRareWordsCount
@@ -137,6 +137,7 @@ public class Algorithm {
 						
 						if(++temp >= RARE_WORDS_IN_DOC) {
 							System.out.println("Mehr als "+RARE_WORDS_IN_DOC+" seltene Worte in Dokument >>> Kein neues Thema.");
+							searcher.getIndexReader().close();
 							return searcher.doc(hits[0].doc).get("topichash");
 						}
 						maybeSimilarDocs.put(hits[j].doc, temp);
@@ -147,7 +148,11 @@ public class Algorithm {
 
 			} 
 		}
-
+		try {
+			searcher.getIndexReader().close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		return "";
 	}
 

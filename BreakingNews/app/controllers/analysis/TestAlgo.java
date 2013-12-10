@@ -60,7 +60,7 @@ public class TestAlgo {
 
 	}
 	
-	public static String hasSimilarRareWords(String text) {
+	/*public static String hasSimilarRareWords(String text) {
 		int rareRangeMax = (int) (Application.getNumberOfAllDocuments()*RARE_APPEARANCE);
 		
 		ArrayList<String> tokens = tokenizeAndRemoveStopWords(text);
@@ -84,14 +84,14 @@ public class TestAlgo {
 				e.printStackTrace();
 			}
 			
-/*			sim = new DefaultSimilarity() {
+			sim = new DefaultSimilarity() {
 				public float tf(float freq) {
 					TestAlgo.freqs.add((int) freq);
 					return super.tf(freq);
 				}
 			};
 			searcher.setSimilarity(sim);
-			freqs = new ArrayList<Integer>(); */
+			freqs = new ArrayList<Integer>(); 
 			
 			try {
 				TopDocs topDocs = searcher.search(booleanQuery, 1);
@@ -99,9 +99,9 @@ public class TestAlgo {
 				
 				if(topDocs.totalHits <= rareRangeMax) {
 					rareWords.add(tokens.get(i));
-/*					for(int j=0; j<freqs.size(); j++) {
+					for(int j=0; j<freqs.size(); j++) {
 						System.out.println("In Dok"+(j+1)+": "+freqs.get(j)+" mal.");
-					} */
+					} 
 					
 					ScoreDoc[] hits = topDocs.scoreDocs;
 					for(int j=0; j<hits.length; j++) {
@@ -119,10 +119,10 @@ public class TestAlgo {
 					}
 				}
 				
-/*				if(topDocs.totalHits > max)
+				if(topDocs.totalHits > max)
 					max = topDocs.totalHits;
 				if(i==0 || topDocs.totalHits < min)
-					min = topDocs.totalHits; */	
+					min = topDocs.totalHits; 	
 				
 			} catch (IOException e) {
 				e.printStackTrace();
@@ -146,30 +146,30 @@ public class TestAlgo {
 			int i=0;
 			docEnum.nextDoc();
 			System.out.println("Freq: "+docEnum.freq());
-/*				while ((doc = docEnum.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
+				while ((doc = docEnum.nextDoc()) != DocsEnum.NO_MORE_DOCS) {
 //				    termFreq += docEnum.freq();
 					System.out.println("In Dok"+i+" ist "+word+" "+docEnum.freq()+" mal.");
 					i++;
-				}*/
+				}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
 	
 	
-	/**
+	*//**
 	 * Term-Frequenz aller Begriffe in allen Dokumenten
 	 * @return
-	 */
+	 *//*
 	public static String checkTermFrequencies() {
 		TFIDFSimilarity tfSim = new DefaultSimilarity();
 		IndexReader reader;
 //		try {
 			reader = Application.getReader();
-/*		} catch (IOException e1) {
+		} catch (IOException e1) {
 			System.out.println("Algorithm.java, checkTermTrequencies(): Error getting IndexReader.");
 			return "";
-		} */
+		} 
 		
 		for (int docID=0; docID<Application.getNumberOfAllDocuments(); docID++) {      
 	        try {
@@ -234,6 +234,6 @@ public class TestAlgo {
 		TestAlgo.hasSimilarRareWords(teeeest);
 //		TestAlgo.checkTF("Jahren");
 //		TestAlgo.checkTermFrequencies();
-	}
+	}*/
 
 }

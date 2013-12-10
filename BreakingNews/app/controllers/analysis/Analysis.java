@@ -6,7 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Random;
 
 import org.apache.commons.codec.binary.Hex;
 import org.apache.lucene.document.Document;
@@ -15,7 +14,9 @@ import org.apache.lucene.document.LongField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
+import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryparser.classic.QueryParser;
+import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.util.Version;
 
@@ -40,13 +41,14 @@ public class Analysis {
 		String isNew = "1";
 		String topicHash = "";
 		long date = Long.parseLong(df.format(publicationDate));
-		int l = 0;
 		int count = 0;
 		Query q;
 		byte[] bytesOfMessage;
 		byte[] theDigest;
 		boolean b = true;
 		String explanation = "";
+		IndexSearcher searcher;
+		IndexWriter writer;
 
 		System.out.println("Beginn der Themen-Detektion ...");
 		while (oldTopicHash.equals("") && i < 4) {
@@ -80,10 +82,8 @@ public class Analysis {
 			isNew = Search.NEWTOPICQUERY;
 	
 				while (b) {
-					Random random = new Random();
-					l = random.nextInt(1000);
 					try {
-						bytesOfMessage = ("" + l).getBytes("UTF-8");
+						bytesOfMessage = (title).getBytes("UTF-8");
 						MessageDigest md = MessageDigest.getInstance("MD5");
 						theDigest = md.digest(bytesOfMessage);
 						topicHash = new String(Hex.encodeHex(theDigest)).substring(0, 6);
@@ -93,19 +93,18 @@ public class Analysis {
 
 					try {
 						q = new QueryParser(Version.LUCENE_46, "topichash", Application.getAnalyzer()).parse(topicHash);
-						count = Application.getSearcher().search(q, 1).totalHits;
-						Application.closeAll();
+						searcher = Application.createSearcher();
+						count = searcher.search(q, 1).totalHits;
+						searcher.getIndexReader().close();
 					} catch (Exception e) {
 						System.out.println("Index-Verzeichnis nicht vorhanden.");
 					}
 					
-					if (count > 0) {
-						l++;
-					} else {
-						b = false; 
-					}
-					System.out.println("Erzeuge neuen Topic-Hash: "+ topicHash);
-				}			
+					if (count == 0) {
+						b = false;
+					} 
+				}	
+				System.out.println("Erzeuge neuen Topic-Hash: "+ topicHash);
 		} else {
 			System.out.println("Thema bereits vorhanden.");
 			isNew = Search.OLDTOPICQUERY;
@@ -125,9 +124,10 @@ public class Analysis {
 			doc.add(new StoredField("urlsource", urlsource)); // StoredField = Field.Index.NO, Field.Store.YES
 			doc.add(new StoredField("urlpicture", urlpicture));
 			doc.add(new StoredField("explanation", explanation));
-
-			Application.getWriter().addDocument(doc);
-			Application.closeAll();
+			
+			writer = Application.createWriter();
+			writer.addDocument(doc);
+			writer.close();
 			System.out.println("Artikel im Index gespeichert!");
 		} catch (Exception e) {
 			System.out.println("Artikel konnte nicht im Index gespeichert werden.");
