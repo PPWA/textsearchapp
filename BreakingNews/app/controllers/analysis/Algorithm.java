@@ -29,7 +29,7 @@ import controllers.preparation.Search;
 
 /**
  * 
- * @author Christian Ochsenkühn
+ * @author Christian Ochsenk&uuml;hn
  * @author Sebastian Mandel
  * @version 1.0
  */
@@ -43,15 +43,30 @@ public class Algorithm {
 	
 	private static ArrayList<String> rareWords = new ArrayList<String>();
 	
-
+	/**
+	 * Zun&auml;chst werden Artikel gesucht, in deren Titel mindestens ein Wort aus
+	 * dem Titel des zu vergleichenden Artikels auftauchen. Das Dokument mit dem
+	 * besten per Vector Space Model festgestellten Scoring wird weiter
+	 * untersucht. Es wird gepr&uuml;ft, wie viel W&ouml;rter aus dem Titel des zu
+	 * vergleichenden Artikels auch im Titel des vermeintlich &auml;hnlichen Artikels
+	 * enthalten sind. Ergibt diese Pr&uuml;fung mehr als 2 identische W&ouml;rter, wird kein neues
+	 * Thema angenommen und der TopicHash des &auml;hnlichen Artikels extrahiert.
+	 * <br><br>
+	 * Fall 1: Gleiche Themen werden als Unterschiedliche erkannt<br>
+	 * H&auml;ufigkeit: Wahrscheinlich<br>
+	 * Folge: Kein Problem, da sp&auml;tere Funktionen dies noch genauer &uuml;berprüfen
+	 * <br><br>
+	 * Fall 2: Unterschiedliche Themen als Gleiche erkannt<br>
+	 * H&auml;ufigkeit: gering<br>
+	 * Folge: Neues Thema geht unter<br>
+	 * @author Sebastian Mandel
+	 * @param queryTitle
+	 *            Titel des Nachrichtenartikels, der auf ein neues Thema hin
+	 *            untersucht werden soll
+	 * @return TopicHash eines Artikels mit &auml;hnlichem Sachverhalt, sofern ein
+	 *         solcher detektiert wird. Ansonsten Leerstring.
+	 */
 	public static String hasSimilarTitle(String queryTitle) {
-		// Fall: Gleiche Themen als unterschiedlich erkannt
-		// Häufigkeit: wahrscheinlich
-		// Folge: Kein Problem, da spätere Funktionen korrigieren
-
-		// Fall: Unterschiedliche Themen als gleich erkannt
-		// Häufigkeit: gering
-		// Folge: Neues Thema geht unter
 		String topicHash = "";
 		ScoreDoc[] hits = null;
 		IndexSearcher searcher = Application.createSearcher();
@@ -64,13 +79,15 @@ public class Algorithm {
 		int i = 0;
 
 		try {
+			//Erzeugung und Durchführung der Suchanfrage 
 			BooleanQuery booleanQuery = new BooleanQuery();
 			query1 = new QueryParser(Version.LUCENE_46, "title", Application.getAnalyzer()).parse(queryTitle);
 			query2 = NumericRangeQuery.newLongRange("date", Search.getLowerBound(), Search.getUpperBound(), true, true);
 			booleanQuery.add(query1, BooleanClause.Occur.MUST);
 			booleanQuery.add(query2, BooleanClause.Occur.MUST);
 			hits = searcher.search(booleanQuery, 1).scoreDocs;
-			System.out.println(queryTitle);
+			
+			//Wird ähnlicher Titel gefunden, Prüfung wieviel Wörter in beiden Titeln vorhanden sind
 			if (hits.length == 1) {
 				docTitle = searcher.doc(hits[0].doc).get("title");
 				queryTokenizer = new StringTokenizer(queryTitle);

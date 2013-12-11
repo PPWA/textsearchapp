@@ -66,7 +66,7 @@ public class Search {
 	 * startet
 	 */
 	private static int hitsPerPage = 5;
-	/* Gibt in ganzen Tagen an, wie weit bei Suchanfragen in die Vergangenheit
+	/** Gibt in ganzen Tagen an, wie weit bei Suchanfragen in die Vergangenheit
 	 * zur&uuml;ckgeschaut werden soll
 	 */
 	private static int timeframe = 90;

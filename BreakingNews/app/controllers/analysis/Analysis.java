@@ -24,15 +24,41 @@ import controllers.Application;
 import controllers.preparation.Search;
 
 /**
- * 
+ * Gibt die Struktur bzw. den Ablauf f&uuml;r den gesamten Textanalyse-Prozess und
+ * seiner einzelnen Schritte vor.
  * 
  * @author Sebastian Mandel
  * @version 1.0
  */
 public class Analysis {
-	
+	/**
+	 * Datumsformat in Lucene
+	 */
 	private static DateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
 
+	/**
+	 * Wendet verschiedene Analyseschritte auf die Metadaten des Artikels an, um
+	 * ein neues Thema zu detektieren. Wurde ein neues Thema in einem Artikel
+	 * gefunden, wird f&uuml;r dieses ein neuer TopicHash generiert. Ansonsten wird
+	 * der bestehende TopicHash eines Artikels mit dem vermeintlich selben
+	 * Sachverhalt verwendet. Am Ende werden die Felder des Artikels, TopiHash
+	 * und das Ergebnis der Themen-Pr&uuml;fung in den Lucene-Index geschrieben.
+	 * 
+	 * @param title
+	 *            Der Titel des Nachrichtenartikels
+	 * @param publicationDate
+	 *            Das Ver&ouml;ffentlichkeitsdatum des Artikels
+	 * @param urlsource
+	 *            Die Quelle des Original-Artikels
+	 * @param urlpicture
+	 *            Die Adresse des Artikelbildes
+	 * @param text
+	 *            Der Volltext des Nachrichtenartikels
+	 * @param teaser
+	 *            Kurzer Anreißertext &uuml;ber den Inhalt des Artikels
+	 * @param Newsanbieter
+	 *            , der Artikel ver&ouml;ffentlicht
+	 */
 	public static void addNewDocument(String title, Date publicationDate,
 			String urlsource, String urlpicture, String text, String teaser,
 			String newsPortal) {
@@ -80,7 +106,8 @@ public class Analysis {
 			System.out.println("Neues Thema gefunden!");
 			explanation = "";
 			isNew = Search.NEWTOPICQUERY;
-	
+				
+				//Erzeugung des TopicHashes aus Titel und Publikationsdatum
 				while (true) {
 					try {
 						count = 0;
@@ -91,8 +118,9 @@ public class Analysis {
 					} catch (UnsupportedEncodingException | NoSuchAlgorithmException e) {
 						System.out.println("Erzeugung des Topic-Hashes fehlgeschlagen.");
 					}
-
+					
 					try {
+						//Prüfen ob TopicHash evtl. schon im Index vorhanden
 						q = new QueryParser(Version.LUCENE_46, "topichash", Application.getAnalyzer()).parse(topicHash);
 						searcher = Application.createSearcher();
 						count = searcher.search(q, 1).totalHits;
