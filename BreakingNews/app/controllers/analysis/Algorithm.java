@@ -143,13 +143,13 @@ public class Algorithm {
 								
 							
 							if(++temp >= RARE_WORDS_IN_DOC) {
-								System.out.println("Mehr als "+RARE_WORDS_IN_DOC+" seltene Worte in Dokument >>> Kein neues Thema.");
+								System.out.println("More than "+RARE_WORDS_IN_DOC+" rare words in document >>> Old Topic");
 								String hash = searcher.doc(hits[j].doc).get("topichash");
-								System.out.println("Similar with "+searcher.doc(hits[j].doc).get("title"));
+								System.out.println("Similar with :"+searcher.doc(hits[j].doc).get("title"));
 								searcher.getIndexReader().close();
 								return hash;
 							}
-	//						System.out.println("Doc #"+hits[j].doc+" hat jetzt "+temp+" seltene Begriffe.");
+//							System.out.println("Doc #"+hits[j].doc+" contains "+temp+" rare words.");
 							maybeSimilarDocs.put(hits[j].doc, temp);
 						}
 					} else {
@@ -168,6 +168,7 @@ public class Algorithm {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		System.out.println("No similar topic found.");
 		return "";
 	}
 
@@ -192,6 +193,13 @@ public class Algorithm {
 	    	tokenStream.reset();
 			while (tokenStream.incrementToken()) {
 			    String tok = tokenStream.getAttribute(CharTermAttribute.class).toString();
+			    try {  
+			      Double.parseDouble(tok);
+			      continue;
+			    } catch(NumberFormatException nfe)  {  
+			        // do nothing
+			    }
+			    
 			    boolean addFlag = true;
 			    // Avoid storing the same token more than 1 time:
 				for(int i=0; i<terms.size(); i++) {

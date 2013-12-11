@@ -22,24 +22,25 @@ public class NewsContentHandler implements ContentHandler {
 	private String currentValue;
 	
 	private String newsPortal;
-	private String title;
 	private String publicationDate;
 	private String urlSource;
 	private String urlPicture;
 	private StringBuffer textBuf;
+	private StringBuffer titleBuf;
 	
 	private boolean isInItem = false;
 	private boolean isEndOfDocument = false;
 	
 	private boolean isExtractedText = false;
+	private boolean isInTitle = false;
 	
 	public NewsContentHandler() {
 		newsPortal = "";
-		title = "";
 		publicationDate = "";
 		urlSource = "";
 		urlPicture = "";
 		textBuf = new StringBuffer();
+		titleBuf = new StringBuffer();
 	}
 
 	/**
@@ -77,6 +78,8 @@ public class NewsContentHandler implements ContentHandler {
 		
 		if(isExtractedText)
 			textBuf.append(buf);
+		else if(isInTitle)
+			titleBuf.append(buf);
 	}
 
 	/**
@@ -89,10 +92,11 @@ public class NewsContentHandler implements ContentHandler {
 		if (localName.equals("item")) {
 			isInItem = true;
 		}
-		if (localName.equals("enclosure") && isInItem) {	// picture-url
+		if(localName.equals("title") && isInItem) {
+			isInTitle = true;
+		} else if (localName.equals("enclosure") && isInItem) {	// picture-url
 			urlPicture = attr.getValue("url");
-		} 
-		if (localName.equals("ExtractedText") && isInItem) {
+		} else if (localName.equals("ExtractedText") && isInItem) {
 			isExtractedText = true;
 		}
 	}
@@ -105,26 +109,21 @@ public class NewsContentHandler implements ContentHandler {
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
 		
-		if (localName.equals("item")) {
-			isInItem = false;
+		if(isInItem) {
+			if (localName.equals("pubDate") && isInItem) {
+				publicationDate = currentValue;
+			} else if (localName.equals("link") && isInItem) {	
+				urlSource = currentValue;
+			} else if (localName.equals("title") && isInItem) {			// article-title
+				isInTitle = false;
+			} else if (localName.equals("ExtractedText")) {
+				isExtractedText = false;
+			} 
+		} else {
+			if (localName.equals("title")) {							// newsPortal-title
+				newsPortal = currentValue;
+			}
 		}
-		
-		if (localName.equals("title") && !isInItem) {	// newsPortal-title
-			newsPortal = currentValue;
-		}
-		if (localName.equals("title") && isInItem) {	// article-title
-			title = currentValue;
-		}
-		if (localName.equals("pubDate") && isInItem) {
-			publicationDate = currentValue;
-		}
-//		if (localName.equals("guid") && isInItem) {
-		if (localName.equals("link") && isInItem) {	
-			urlSource = currentValue;
-		}
-		if (localName.equals("ExtractedText") && isInItem) {
-			isExtractedText = false;
-		} 
 	}
 	
 	/**
@@ -168,7 +167,7 @@ public class NewsContentHandler implements ContentHandler {
 	 * @return Titel des Artikels
 	 */
 	public String getTitle() {
-		return title;
+		return titleBuf.toString();
 	}
 
 	/**
@@ -200,6 +199,7 @@ public class NewsContentHandler implements ContentHandler {
 			} catch (ParseException e1) {
 				System.out.println("NewsContentHandler.java: Could not parse date, again!");
 				try {
+					// example: Sun, 06 Oct 2013 20:58:57
 					pubDate = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss", Locale.ENGLISH).parse(publicationDate);
 					System.out.println("NewsContentHandler.java: Next try parsing date succeeded.");
 				} catch (ParseException e2) {

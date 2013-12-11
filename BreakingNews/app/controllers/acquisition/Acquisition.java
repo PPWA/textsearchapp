@@ -73,7 +73,8 @@ public class Acquisition {
 				
 				Calendar threeMonthsAgo = Calendar.getInstance();
 				threeMonthsAgo.add(Calendar.MONTH, -3);
-				if(handl.getPublicationDate().compareTo(threeMonthsAgo.getTime()) < 0) {
+				Date tempDate = handl.getPublicationDate();
+				if(tempDate.compareTo(threeMonthsAgo.getTime()) < 0) {
 					System.out.println("Acquisition: Article is older than three months and will not be analysed.");
 					deleteFile(DIR+newXMLFiles.get(i));
 					continue;
@@ -85,7 +86,7 @@ public class Acquisition {
 				
 				Analysis.addNewDocument(
 						title,
-						handl.getPublicationDate(),
+						tempDate,
 						handl.getUrlSource(),
 						handl.getUrlPicture(),
 						handl.getText(),
@@ -200,7 +201,7 @@ public class Acquisition {
 	private static boolean deleteFile(String pathToFile) {
 		File tempFile = new File(pathToFile);
 		boolean deleteSuccess = tempFile.delete();
-		if(deleteSuccess) System.out.println("Acquisition.java: Successfully deleted "+pathToFile);
+		if(deleteSuccess) System.out.println("Acquisition: Successfully deleted "+pathToFile);
 		else System.out.println("Acquisition: Failed to delete "+pathToFile);
 		
 		return deleteSuccess;
