@@ -21,33 +21,46 @@ import play.mvc.Result;
 import views.html.index;
 
 /**
- * Klasse ist der Standard-Einstiegspunkt von Play!
+ * Klasse ist der Standard-Einstiegspunkt von Play! und enth&auml;lt globale Einstellungen und Konstanten.
  * 
- * @author Automatisch generiert
+ * @author Sebastian Mandel
  * @version 1.0
  */
 public class Application extends Controller {
 
 	// inkl. StandardTokenizer, LowerCaseFilter, StopwortFilter
-	private static Analyzer analyzer = new GermanAnalyzer(Version.LUCENE_46);
-	private static File file = new File("index2");
-	/***
-	 * Globale Referenz auf den Reader f&uuml;r alle Suchanfragen.
+	/**
+	 * Globale Referenz auf den Analyzer f&uuml;r alle Suchanfragen.
 	 */
-
+	private static Analyzer analyzer = new GermanAnalyzer(Version.LUCENE_46);
+	/**
+	 * Globale Referenz das Filehandle.
+	 */
+	private static File file = new File("index2");
+	/**
+	 * &Uuml;berschriebene Similarity f&uuml;r alle Suchanfragen und Indexierungen
+	 */
 	private static Similarity sim = new DefaultSimilarity() {
-		public float idf(long i, long i1) {
+
+		/**
+		 * &Uuml;berschreibt bei der Berechnung des Vector Space Models die
+		 * invertierte Termfrequenz um dabei unber&uuml;cksichtigt zu lassen, wie oft
+		 * ein Term im gesamten Index vorkommt.
+		 * 
+		 * @param docFreq Anzahl der Dokumente, die Term enthalten,
+		 * @param numDocs Gesamtanzahl der Dokumente im Index
+		 * @return Konstanten Wert 1
+		 */
+		public float idf(long docFreq, long numDocs) {
 			return 1;
 		}
 	};
-	
+
 	/**
-	 * &Ouml;ffnet einen SuchReader auf dem angegebenen Index auf der Festplatte
+	 * Erzeugt einen neuen Reader und einen Searcher auf dem angegebenen Index auf der Festplatte
 	 * und gibt ihn zur&uuml;ck.
 	 * 
-	 * @return eine Referenz auf den SearchReader
-	 * @throws Exception
-	 *             wenn der spezifizierte Index nicht vorhanden ist.
+	 * @return eine Referenz auf den Searcher
 	 */
 	public static IndexSearcher createSearcher() {
 		try {
@@ -60,10 +73,16 @@ public class Application extends Controller {
 			return null;
 		}
 	}
-	
+
+	/**
+	 * Erzeugt einen IndexWriter auf dem angegebenen Index
+	 * 
+	 * @return eine Referenz auf den IndexWriter
+	 */
 	public static IndexWriter createWriter() {
 		try {
-			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,analyzer).setSimilarity(sim);
+			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,
+					analyzer).setSimilarity(sim);
 			iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
 			IndexWriter writer = new IndexWriter(FSDirectory.open(file), iwc);
 			return writer;
@@ -73,12 +92,17 @@ public class Application extends Controller {
 		}
 	}
 	
+	/**
+	 * 
+	 * @return Eine Referenz auf den Analzyer
+	 */
 	public static Analyzer getAnalyzer() {
 		return analyzer;
 	}
-	
+
 	/**
 	 * Gibt die Anzahl aller im Index gespeicherten Dokumente zur&uuml;ck.
+	 * 
 	 * @return Anzahl aller Dokumente im Index
 	 */
 	public static int getNumberOfAllDocuments() {
@@ -92,7 +116,7 @@ public class Application extends Controller {
 			return 0;
 		}
 	}
-		
+
 	/**
 	 * Gibt die Startseite zur&uuml;ck, sobald ein Client diese aufruft.
 	 * 
