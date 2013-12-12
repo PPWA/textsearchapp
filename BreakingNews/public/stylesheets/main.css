@@ -68,7 +68,7 @@ body {
             width:100%;
             padding:5px 0;
         }
-        .art_header h2 { margin:0; }
+        .art_header h2 { margin:0; color:#ffffff; }
         .img_rss { float:left; margin:0 5px; }
         .art_img { 
             width:160px; height:120px;
@@ -139,6 +139,6 @@ a { color:#2980b9; text-decoration:none; font-weight:bold; }
 a:hover {  }
 h2 { font-size:1em; }
 
-#logo h1, .art_header a { color:#000000; }
+#logo h1, .art_header a { color:#ffffff; }
 header, .art_header { background-color:#2980b9; }
 .art_newsportal { color:#333333; font-weight:bold; }
