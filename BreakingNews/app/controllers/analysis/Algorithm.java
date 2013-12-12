@@ -213,7 +213,7 @@ public class Algorithm {
 	public static String hasSimilarBody(String text) {
 		String topicHash = "";
 		if(maybeSimilarDocs!=null) {
-			// Iteriert jedes Dokument mit seltenen Begriffen:
+			// Iteriert jedes Dokument, welches seltene Begriffe enthält:
 			for(int docId : maybeSimilarDocs.keySet())
 		    {
 				if(maybeSimilarDocs.get(docId) > RARE_WORDS_LOWER_BOUND) {
