@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
 
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.RealVector;
 import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.StopFilter;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
@@ -22,6 +24,8 @@ import org.apache.lucene.search.NumericRangeQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
+import org.apache.lucene.search.similarities.DefaultSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.util.Version;
 
 import controllers.Application;
@@ -37,11 +41,17 @@ public class Algorithm {
 
 	// Prozentuales Vorkommen in allen Dokumenten, ab der ein Wort noch als selten gilt:
 	private final static float RARE_APPEARANCE = (float) 0.05; // = 5%
-	
 	// Anzahl der seltenen Wörter, ab der ein Dokument als selbes Thema angesehen wird:
-	private final static int RARE_WORDS_IN_DOC = 15;
+	private final static int RARE_WORDS_UPPER_BOUND = 15;
+	// Anzahl der seltenen Wörter, ab der ein Dokument eventuell dem selben Thema zugehören könnte:
+	private final static int RARE_WORDS_LOWER_BOUND = 5;
+	// Schwellwert, ab dem der Cosinus-Abstand zweier Vektoren dasselbe Thema annimmt:
+	private final static float COSINUS_BOUND = (float) 0.5;
 	
-	private static ArrayList<String> rareWords = new ArrayList<String>();
+//	private static ArrayList<String> rareWords;
+	// Integer docId, int sameRareWordsCount
+	private static Map<Integer, Integer> maybeSimilarDocs;
+	private static Map<String, Integer> currentTokens;
 	
 	/**
 	 * Zun&auml;chst werden Artikel gesucht, in deren Titel mindestens ein Wort aus
@@ -114,43 +124,45 @@ public class Algorithm {
 		return topicHash;
 	}
 
+	/**
+	 * Diese Funktion sucht die seltenen Worte eines gegebenen Texts im Index und analysiert,
+	 * wieviele Dokumente des Index diese seltenen Worte enthalten. Sobald der Schwellwert RARE_WORDS_UPPER_BOUND
+	 * an seltenen Worten in einem Dokument &uuml;berschritten wird, so wird dieses Dokument als &auml;hnlich zum
+	 * &uuml;bergebenen Text angesehen. Der TopicHash des &auml;hnlichen Dokuments wird zur&uuml;ckgegeben.
+	 * Sollte keines der Dokumente den Schwellwert überschreiten, so wird ein leerer String zur&uuml;ckgegeben. 
+	 * @author Christian Ochsenk&uuml;hn
+	 * @param text = Zu analysierender Text
+	 * @return TopicHash eines &auml;hnlichen Artikels, ansonsten leerer String
+	 */
 	public static String hasSimilarRareWords(String text) {
-		// Seltene Wörter herausfinden und global speichern,
-		// Artikel suchen die mehr als fünf dieser Wörter aufweisen,
-		// bei Fund Abbruch und dessen topichash
-
 		int rareRangeMax = (int) (Application.getNumberOfAllDocuments()*RARE_APPEARANCE);
 		if(rareRangeMax<1)
 			rareRangeMax = 1;
 //		System.out.println("rareRangeMax: "+rareRangeMax);
-		ArrayList<String> tokens = tokenizeAndRemoveStopWords(text);
+		
+		currentTokens = tokenizeAndRemoveStopWords(text);
 		
 		IndexSearcher searcher = Application.createSearcher();
 		Query query2 = NumericRangeQuery.newLongRange("date",Search.getLowerBound(), Search.getUpperBound(), true, true);
 		
-		// Integer docId, int sameRareWordsCount
-		Map<Integer, Integer> maybeSimilarDocs = new HashMap<Integer, Integer>();
+		maybeSimilarDocs = new HashMap<Integer, Integer>(); // < Integer docId, Integer sameRareWordsCount >
 		
-		for(int i=0; i<tokens.size(); i++) {
+		for(String token : currentTokens.keySet()) {
+			// Für jeden Begriff: Durchsuchen des Index:
 			BooleanQuery booleanQuery = new BooleanQuery();
 			try {
-				Query query1 = new QueryParser(Version.LUCENE_46, "text",Application.getAnalyzer()).parse(tokens.get(i));
+				Query query1 = new QueryParser(Version.LUCENE_46, "text",Application.getAnalyzer()).parse(token);
 				booleanQuery.add(query1, BooleanClause.Occur.MUST);
 				booleanQuery.add(query2, BooleanClause.Occur.MUST);
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
-			
 			try {
 				TopDocs topDocs = searcher.search(booleanQuery, 1);
 				if(topDocs.totalHits>0) {
 					topDocs = searcher.search(booleanQuery, topDocs.totalHits);
 				
-					if(topDocs.totalHits <= rareRangeMax) {
-	//				if(true) {
-						rareWords.add(tokens.get(i));
-	//					System.out.println("Seltenes Wort: "+tokens.get(i));
-						
+					if(topDocs.totalHits <= rareRangeMax) { // Wenn es ein seltener Begriff ist, dann...				
 						ScoreDoc[] hits = topDocs.scoreDocs;
 						for(int j=0; j<hits.length; j++) {
 							int temp = 0;
@@ -158,15 +170,14 @@ public class Algorithm {
 							if(maybeSimilarDocs.get(hits[j].doc)!=null)
 								temp = maybeSimilarDocs.get(hits[j].doc);
 								
-							
-							if(++temp >= RARE_WORDS_IN_DOC) {
-								System.out.println("More than "+RARE_WORDS_IN_DOC+" rare words in document >>> Old Topic");
+							if(++temp >= RARE_WORDS_UPPER_BOUND) {
+	//							System.out.println("More than "+RARE_WORDS_UPPER_BOUND+" rare words in document >>> Old Topic");
 								String hash = searcher.doc(hits[j].doc).get("topichash");
-								System.out.println("Similar with :"+searcher.doc(hits[j].doc).get("title"));
+	//							System.out.println("Similar with :"+searcher.doc(hits[j].doc).get("title"));
 								searcher.getIndexReader().close();
 								return hash;
 							}
-//							System.out.println("Doc #"+hits[j].doc+" contains "+temp+" rare words.");
+	//						System.out.println("Doc #"+hits[j].doc+" contains "+temp+" rare words.");
 							maybeSimilarDocs.put(hits[j].doc, temp);
 						}
 					} else {
@@ -189,50 +200,112 @@ public class Algorithm {
 		return "";
 	}
 
+	/**
+	 * Vergleicht einen übergebenen Text mit allen Dokumenten, die mehr als RARE_WORDS_LOWER_BOUND gleiche seltene
+	 * Begriffe enthalten. Dazu nutzt er die Anzahl des Vorkommens aller Begriff, legt diese für jeden Text in einem
+	 * Vektor ab und vergleicht den Abstand der Vektoren. Ab einem Abstand von COSINUS_BOUND wird ein ähnliches Thema
+	 * angenommen und der TopicHash des &auml;hnlichen Dokuments wird zur&uuml;ckgegeben.
+	 * Sollte keines der Dokumente den Schwellwert überschreiten, so wird ein leerer String zur&uuml;ckgegeben. 
+	 * @author Christian Ochsenk&uuml;hn
+	 * @param text = Zu analysierender Text
+	 * @return TopicHash eines &auml;hnlichen Artikels, ansonsten leerer String
+	 */
 	public static String hasSimilarBody(String text) {
 		String topicHash = "";
-		// Artikel suchen die 2-5 der zuvor gespeicherten seltenen begriffe
-		// enthalten
-		// und mit denen vector space,
-		// bei 40 % übereinstimmung abbruch und dessen topichash,
-		// wenn keine artikel mit 2-5 gefunden -> neues Thema
+		if(maybeSimilarDocs!=null) {
+			// Iteriert jedes Dokument mit seltenen Begriffen:
+			for(int docId : maybeSimilarDocs.keySet())
+		    {
+				if(maybeSimilarDocs.get(docId) > RARE_WORDS_LOWER_BOUND) {
+					Map<String, Integer> similarDocTF = Application.getTermFrequencies(docId);
+					for(String temp : similarDocTF.keySet()) {
+						System.out.println("\""+temp+"\": "+similarDocTF.get(temp));
+					}
+					RealVector simVector = createRealVector(similarDocTF,similarDocTF);
+					RealVector newDocVector = createRealVector(similarDocTF, currentTokens);
+					double cosSim = getCosineSimilarity(simVector, newDocVector);
+					System.out.println("(3) CosineSimilarity: "+cosSim);
+					if(cosSim > COSINUS_BOUND) {
+						try {
+							IndexSearcher searcher = Application.createSearcher();
+							topicHash = searcher.doc(docId).get("topichash");
+							searcher.getIndexReader().close();
+							return topicHash;
+						} catch (IOException e) {
+							System.out.println("Algorithm: Error getting topicHash.");
+						}
+						
+					}
+				}
+		    }
+		} else {
+		//	System.out.println("Keine seltenen Begriffe im Dokument...");
+		}
+		
 		return topicHash;
 	}
 	
-	public static ArrayList<String> tokenizeAndRemoveStopWords(String input) {  
+	/**
+	 * Berechnet den Abstand zwischen zwei Vektoren und gibt ihn zur&uuml;ck
+	 * @author Christian Ochsenk&uuml;hn
+	 * @param vec1 = Vector 1
+	 * @param vec2 = Vector 2
+	 * @return Abstand zwischen den Vektoren (1 entspricht einem Winkel von 0°)
+	 */
+	private static double getCosineSimilarity(RealVector vec1, RealVector vec2) {
+        return (vec1.dotProduct(vec2)) / (vec1.getNorm() * vec2.getNorm());
+    }
+	
+	/**
+	 * Erzeugt aus einer Termfrequenz-Map einen Vector.
+	 * @author Christian Ochsenk&uuml;hn
+	 * @param rootMap = Ursprungsset an Begriffen, an welchem sich der neue Vector ausrichten soll
+	 * @param mapToVector = Termfrequenz-Map, die in einen Vector umgewandelt werden soll
+	 * @return Neuer TF-Vector
+	 */
+	private static RealVector createRealVector(Map<String, Integer> rootMap, Map<String, Integer> mapToVector) {
+        RealVector vector = new ArrayRealVector(rootMap.size());
+        int i = 0;
+        for (String term : rootMap.keySet()) {
+            int value = mapToVector.containsKey(term) ? mapToVector.get(term) : 0;
+            vector.setEntry(i++, value);
+        }
+        return (RealVector) vector.mapDivide(vector.getL1Norm());
+    }
+	
+	/**
+	 * Teilt gegebenen Text in Tokens und entfernt die Stopwords. Zählt das Vorkommen jedes Terms im Text.
+	 * @author Christian Ochsenk&uuml;hn
+	 * @param text = Text der geteilt werden soll
+	 * @return Tokens und jeweilige Anzahl des Vorkommens
+	 */
+	public static Map<String, Integer> tokenizeAndRemoveStopWords(String text) {  
 	    TokenStream tokenStream = new StandardTokenizer(
-	            Version.LUCENE_46, new StringReader(input));
+	            Version.LUCENE_46, new StringReader(text));
 	    tokenStream = new StopFilter(Version.LUCENE_46, tokenStream, ((GermanAnalyzer)Application.getAnalyzer()).getStopwordSet());
 	    tokenStream = new PorterStemFilter(tokenStream);
 	    
-	    ArrayList<String> terms = new ArrayList<String>();
+	    Map<String, Integer> termFreq = new HashMap<String, Integer>();
 	    try {
 	    	tokenStream.reset();
 			while (tokenStream.incrementToken()) {
 			    String tok = tokenStream.getAttribute(CharTermAttribute.class).toString();
 			    try {  
 			      Double.parseDouble(tok);
-			      continue;
+			      continue;	// do not add numbers!
 			    } catch(NumberFormatException nfe)  {  
-			        // do nothing
+			        // everything ok!
 			    }
 			    
-			    boolean addFlag = true;
-			    // Avoid storing the same token more than 1 time:
-				for(int i=0; i<terms.size(); i++) {
-					if(tok.equals(terms.get(i))) {
-						addFlag = false;
-						break;
-					}
-				}
-				
-				if(addFlag)
-					terms.add(tokenStream.getAttribute(CharTermAttribute.class).toString());
+			    if(termFreq.containsKey(tok))
+			    	termFreq.put(tok, (termFreq.get(tok)+1));
+			    else
+			    	termFreq.put(tok, 1);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	    
-	    return terms;
+	    return termFreq;
 	}
 }

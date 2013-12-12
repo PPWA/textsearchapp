@@ -2,6 +2,8 @@ package controllers;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.de.GermanAnalyzer;
@@ -10,10 +12,13 @@ import org.apache.lucene.index.IndexReader;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.IndexWriterConfig.OpenMode;
+import org.apache.lucene.index.Terms;
+import org.apache.lucene.index.TermsEnum;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.similarities.DefaultSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
+import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
 
 import play.mvc.Controller;
@@ -102,7 +107,7 @@ public class Application extends Controller {
 
 	/**
 	 * Gibt die Anzahl aller im Index gespeicherten Dokumente zur&uuml;ck.
-	 * 
+	 * @author Christian Ochsenk&uuml;hn
 	 * @return Anzahl aller Dokumente im Index
 	 */
 	public static int getNumberOfAllDocuments() {
@@ -116,6 +121,35 @@ public class Application extends Controller {
 			return 0;
 		}
 	}
+	
+	/**
+	 * Holt sich die Term-Frequenz eines bestimmten Dokuments und gibt diese zur&uuml;ck.
+	 * @author Christian Ochsenk&uuml;hn
+	 * @param docId: Dokumenten-Id im Index
+	 * @return Alle Terme inklusive Anzahl des Vorkommens im Dokument
+	 */
+	public static Map<String, Integer> getTermFrequencies(int docId) {
+		try {
+			IndexReader reader = DirectoryReader.open(FSDirectory.open(file));
+			Terms vector = reader.getTermVector(docId, "text");
+			reader.close();
+			TermsEnum termsEnum = null;
+			termsEnum = vector.iterator(termsEnum);
+			Map<String, Integer> frequencies = new HashMap<String, Integer>();
+			BytesRef byteText = null;
+			while ((byteText = termsEnum.next()) != null) {
+			    String term = byteText.utf8ToString();
+			    int freq = (int) termsEnum.totalTermFreq();
+			    frequencies.put(term, freq);
+			}
+			return frequencies;
+		} catch (IOException e) {
+			System.out.println("Application: Can not get termfrequencies!");
+		} catch(NullPointerException ne) {
+			System.out.println("Application: No termvector found.");
+		}
+		return null;
+    }
 
 	/**
 	 * Gibt die Startseite zur&uuml;ck, sobald ein Client diese aufruft.

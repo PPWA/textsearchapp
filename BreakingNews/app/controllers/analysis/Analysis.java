@@ -10,6 +10,7 @@ import java.util.Date;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
+import org.apache.lucene.document.FieldType;
 import org.apache.lucene.document.LongField;
 import org.apache.lucene.document.StoredField;
 import org.apache.lucene.document.StringField;
@@ -149,7 +150,11 @@ public class Analysis {
 			doc.add(new StringField("topichash", topicHash, Field.Store.YES));
 			doc.add(new TextField("title", title, Field.Store.YES)); // TextField = Field.Index.ANALYZED
 			doc.add(new StringField("teaser", teaser, Field.Store.YES));
-			doc.add(new TextField("text", text, Field.Store.NO)); 
+			FieldType type = new FieldType();
+				type.setIndexed(true);
+				type.setStored(false);
+				type.setStoreTermVectors(true);
+			doc.add(new Field("text", text, type));
 			doc.add(new LongField("date", date, Field.Store.YES));
 			doc.add(new StringField("newsportal", newsPortal, Field.Store.YES));
 			doc.add(new StoredField("urlsource", urlsource)); // StoredField = Field.Index.NO, Field.Store.YES
