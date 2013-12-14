@@ -1,5 +1,6 @@
 init();
 refresh();
+portals();
 
 function init(){ 
 	$("#main").html("");	
@@ -62,11 +63,53 @@ $.getJSON("/old-topics", function (data){
 	});
 }
 
-function refresh(){ 
+/*anfrage nach neuen Artikeln*/
+function refresh(){
 	$.getJSON("/start-search", function (data){ 
 		if (data.new_art_count != 0){
 			init();
 		}
 		
 	}); 
+	
 }
+
+
+
+/*portals*/
+function portals(){
+	$.getJSON("/news-portals", function (data){ 
+		$.each(data.newsportals, function(i,item) { 
+			//alert("test");
+			var portals = " ";
+			var sum="";
+		
+		
+			portals = 
+				
+				'<div class="dia_name">' + item["np_name"] +'</div>' 
+				+
+				'<div class="dia_anzahl">' + item["np_count"] +'</div>'
+				+
+				'<br>';
+
+				
+
+			$("#portals").append(portals);
+
+		}); 
+	});
+}
+
+
+
+/*Laden des WaitImages*/
+
+var img = "/assets/images/waitBird.png";
+
+function waitImage(){
+	 spriteImage = document.getElementById("btn_refresh");
+	 spriteImage.src = img;
+	 alert("Neue Artikel geladen");
+}
+

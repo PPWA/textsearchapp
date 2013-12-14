@@ -8,8 +8,7 @@
 			<h1>Early Bird News</h1>
 			<div style="clear:both;"></div>
 		</div>
-
-		<a href="#" onclick="refresh()">
+		<a id ="sprite" href="" onclick="refresh(), waitImage()" >
 			<img id="btn_refresh" src="@routes.Assets.at("images/refresh.png")" alt="Refresh" />
 		</a>
 		<div style="clear:both;"></div>
@@ -27,8 +26,9 @@
 				<img class="img_rss" src="@routes.Assets.at("images/early-birds.png")" alt="" />
 				<h2>Early Birds</h2>
 			</div>
+			
 			<div id="portals">
-				<div class="portal" style="width:50%;">
+				<!-- <div class="portal" style="width:50%;">
 					<p>Süddeutsche</p>
 				</div>
 				<div class="portal" style="width:32%;">
@@ -39,7 +39,7 @@
 				</div>
 				<div class="portal" style="width:6%;">
 					<p>Guardian</p>
-				</div>
+				</div> -->
 			</div>
 		</div>
 		

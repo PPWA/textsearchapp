@@ -110,15 +110,17 @@ body {
 		}
 		.portal p { margin:0; }
 		
-		#old_news {
-			padding:5px;
-		}
-		.old_art a h2 { color:#000; margin:0; text-align:center; }
-		.old_date { float:left; font-size:0.8em; }
-		.old_portal { float:right; font-size:0.8em; }
+		
        
         /* Formatierung oldArticles*/
-
+        #old_news {
+			padding:5px;
+		}
+		
+        .old_art a h2 { color:#000; margin:0; text-align:center; }
+		.old_date { float:left; font-size:0.8em; }
+		.old_portal { float:right; font-size:0.8em; }
+        
         #right_column .art_img { 
             width:80px; height:60px;
             float:left;
@@ -132,7 +134,12 @@ body {
         #right_column .art_time p { 
             margin:0; color:#BBBBBB; 
         }
-        
+
+/*test*/
+        .dia_name { color:#000; margin:0; text-align:center; font-size:0.8em; }
+        .dia_anzahl { float:left; font-size:0.8em; }
+
+
 /* Styling: */
 
 a { color:#2980b9; text-decoration:none; font-weight:bold; }
