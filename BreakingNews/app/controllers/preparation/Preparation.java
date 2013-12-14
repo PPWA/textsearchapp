@@ -27,15 +27,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 public class Preparation extends Controller {
 
 	/**
-	 * Verwendetes Datumfsformat in Lucene
-	 */
-	private static SimpleDateFormat sdfD = new SimpleDateFormat("yyyyMMddHHmm");
-	/**
-	 * Verwendetes Datumfsformat in JSON und Frontend
-	 */
-	private static SimpleDateFormat sdfS = new SimpleDateFormat("dd. MMMM yyyy HH:mm", Locale.GERMAN);
-
-	/**
 	 * Wandelt das Datum wie es im Lucene-Index gespeichert ist in ein Format um, welches in JSON und damit im Frontend angezeigt wird.
 	 * 
 	 * @param LDate Umzuwandelndes Datum in Lucene-Schreibweise
@@ -43,8 +34,10 @@ public class Preparation extends Controller {
 	 */
 	public static String LDateToJSDate(String LDate) {
 		try {
+			SimpleDateFormat sdfD = new SimpleDateFormat("yyyyMMddHHmm");
+			SimpleDateFormat sdfS = new SimpleDateFormat("dd. MMMM yyyy HH:mm", Locale.GERMAN);
 			return sdfS.format(sdfD.parse(LDate)) + " Uhr";
-		} catch (ParseException e) {
+		} catch (Exception e) {
 			System.out.println("Formatierung von Datum fehlerhaft.");
 			return "00.00.0000 00:00 Uhr";
 		}

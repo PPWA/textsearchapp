@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 
 import org.xml.sax.InputSource;
@@ -51,13 +52,15 @@ public class Acquisition {
 		ArrayList<String> newXMLFiles = searchNewXMLFiles(DIR);
 		
 		if(newXMLFiles.isEmpty()) {
-			System.out.println("\nAcquisition.java: No new XML files found.");
+			System.out.println("\nAcquisition: No new XML files found.");
 		} else {		
 			for(int i=0; i<newXMLFiles.size(); i++) {
 				handl = new NewsContentHandler();
 				
-				System.out.println("\nAcquisition.java: New File: "+newXMLFiles.get(i));
-				readXMLFile(DIR+newXMLFiles.get(i), handl);
+				System.out.println("\nAcquisition: New File: "+newXMLFiles.get(i));
+				if(!readXMLFile(DIR+newXMLFiles.get(i), handl))
+					continue;
+				
 				while(!handl.hasStoppedReading()) {
 					try {
 						Thread.sleep(1000);
@@ -66,9 +69,24 @@ public class Acquisition {
 					}
 				}
 				
+//				showMeWhatYouGot(handl); 	// for testing
+				
+				Calendar threeMonthsAgo = Calendar.getInstance();
+				threeMonthsAgo.add(Calendar.MONTH, -3);
+				Date tempDate = handl.getPublicationDate();
+				if(tempDate.compareTo(threeMonthsAgo.getTime()) < 0) {
+					System.out.println("Acquisition: Article is older than three months and will not be analysed.");
+					deleteFile(DIR+newXMLFiles.get(i));
+					continue;
+				}
+				
+				String title = "Kein Titel";
+				if(!handl.getTitle().equals(""))
+					title = handl.getTitle();
+				
 				Analysis.addNewDocument(
-						handl.getTitle(),
-						handl.getPublicationDate(),
+						title,
+						tempDate,
 						handl.getUrlSource(),
 						handl.getUrlPicture(),
 						handl.getText(),
@@ -102,7 +120,7 @@ public class Acquisition {
 			if(xmlFiles[i].endsWith(".xml"))
 				newXMLFiles.add(xmlFiles[i]);
 			else {
-				System.out.println("Acquisition.java: "+xmlFiles[i]+" is not a xml file.");
+				System.out.println("Acquisition: "+xmlFiles[i]+" is not a xml file.");
 				deleteFile(directory+xmlFiles[i]);
 			}
 		}
@@ -143,10 +161,10 @@ public class Acquisition {
 	 * @param handl
 	 * 			NewsContentHandler, welcher das Auslesen &uuml;bernimmt und im Anschluss die gelesenen Informationen enth&auml;lt
 	 */
-	private static void readXMLFile(String pathToFile, NewsContentHandler handl) {
+	private static boolean readXMLFile(String pathToFile, NewsContentHandler handl) {
 		try {
 			long timeStart = System.currentTimeMillis();
-			System.out.println("Acquisition.java: Start reading XML...");
+			System.out.println("Acquisition: Start reading XML...");
 			// Create reader
 			XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 			
@@ -159,17 +177,19 @@ public class Acquisition {
 			xmlReader.parse(inputSource);
 			
 			String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
-			System.out.println("Acquisition.java: Succesfully read XML in "+duration+" seconds!");
+			System.out.println("Acquisition: Succesfully read XML in "+duration+" seconds!");
+			return true;
 		} catch (SAXException e) {
-			System.out.println("Acquisition.java: SAX-Error while parsing "+pathToFile);
+			System.out.println("Acquisition: SAX-Error while parsing "+pathToFile);
 			handl.setIsEndOfDocument(true);
 			deleteFile(pathToFile);
 		} catch (FileNotFoundException e) {
-			System.out.println("Acquisition.java: Could not find "+pathToFile+"!");
+			System.out.println("Acquisition: Could not find "+pathToFile+"!");
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.out.println("Acquisition.java: Input/Output-Error while parsing "+pathToFile);
+			System.out.println("Acquisition: Input/Output-Error while parsing "+pathToFile);
 		}
+		return false;
 	}
 	
 	/**
@@ -181,9 +201,23 @@ public class Acquisition {
 	private static boolean deleteFile(String pathToFile) {
 		File tempFile = new File(pathToFile);
 		boolean deleteSuccess = tempFile.delete();
-		if(deleteSuccess) System.out.println("Acquisition.java: Successfully deleted "+pathToFile);
-		else System.out.println("Acquisition.java: Failed to delete "+pathToFile);
+		if(deleteSuccess) System.out.println("Acquisition: Successfully deleted "+pathToFile);
+		else System.out.println("Acquisition: Failed to delete "+pathToFile);
 		
 		return deleteSuccess;
+	}
+	
+	/**
+	 * F&uuml;r Testzwecke: Gibt alle vom NewsContentHandler eingelesenen Daten in der Console aus
+	 * @param handl
+	 */
+	private static void showMeWhatYouGot(NewsContentHandler handl) {
+		System.out.println("Title: "+handl.getTitle());
+		System.out.println("PubDate: "+handl.getPublicationDate());
+		System.out.println("Url: "+handl.getUrlSource());
+		System.out.println("Pic: "+handl.getUrlPicture());
+//		System.out.println("Text: "+handl.getText());
+		System.out.println("Teaser: "+handl.getTeaser());
+		System.out.println("Portal: "+handl.getNewsPortal());
 	}
 }
