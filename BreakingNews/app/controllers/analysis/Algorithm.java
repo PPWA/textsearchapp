@@ -1,5 +1,6 @@
 package controllers.analysis;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
@@ -15,6 +16,12 @@ import org.apache.lucene.analysis.de.GermanAnalyzer;
 import org.apache.lucene.analysis.en.PorterStemFilter;
 import org.apache.lucene.analysis.standard.StandardTokenizer;
 import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
+import org.apache.lucene.document.Document;
+import org.apache.lucene.document.Field;
+import org.apache.lucene.document.FieldType;
+import org.apache.lucene.index.IndexWriter;
+import org.apache.lucene.index.IndexWriterConfig;
+import org.apache.lucene.index.IndexWriterConfig.OpenMode;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.BooleanClause;
@@ -26,6 +33,7 @@ import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.DefaultSimilarity;
 import org.apache.lucene.search.similarities.Similarity;
+import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
 import controllers.Application;
@@ -46,7 +54,7 @@ public class Algorithm {
 	// Anzahl der seltenen Wörter, ab der ein Dokument eventuell dem selben Thema zugehören könnte:
 	private final static int RARE_WORDS_LOWER_BOUND = 5;
 	// Schwellwert, ab dem der Cosinus-Abstand zweier Vektoren dasselbe Thema annimmt:
-	private final static float COSINUS_BOUND = (float) 0.5;
+	private final static float COSINUS_BOUND = (float) 0.75;
 	
 //	private static ArrayList<String> rareWords;
 	// Integer docId, int sameRareWordsCount
@@ -114,12 +122,12 @@ public class Algorithm {
 				}
 				if (i >= 3) {
 					topicHash = searcher.doc(hits[0].doc).get("topichash");
-					System.out.println("Aehnlicher Titel gefunden: " + topicHash);
+					System.out.println("   Aehnlicher Titel gefunden: " + topicHash);
 				}	
 			}
 			searcher.getIndexReader().close();
 		} catch (IOException | ParseException | NullPointerException e) {
-			System.out.println("hasSimilarTitle fehlgeschlagen da Index nicht vorhanden.");
+			System.out.println("   hasSimilarTitle fehlgeschlagen da Index nicht vorhanden.");
 		}
 		return topicHash;
 	}
@@ -140,7 +148,7 @@ public class Algorithm {
 			rareRangeMax = 1;
 //		System.out.println("rareRangeMax: "+rareRangeMax);
 		
-		currentTokens = tokenizeAndRemoveStopWords(text);
+		currentTokens = getTFMap(text);
 		
 		IndexSearcher searcher = Application.createSearcher();
 		Query query2 = NumericRangeQuery.newLongRange("date",Search.getLowerBound(), Search.getUpperBound(), true, true);
@@ -175,6 +183,7 @@ public class Algorithm {
 								String hash = searcher.doc(hits[j].doc).get("topichash");
 	//							System.out.println("Similar with :"+searcher.doc(hits[j].doc).get("title"));
 								searcher.getIndexReader().close();
+								System.out.println("   Aehnlich zu Thema " + hash);
 								return hash;
 							}
 	//						System.out.println("Doc #"+hits[j].doc+" contains "+temp+" rare words.");
@@ -196,7 +205,6 @@ public class Algorithm {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		System.out.println("No similar topic found.");
 		return "";
 	}
 
@@ -218,23 +226,24 @@ public class Algorithm {
 		    {
 				if(maybeSimilarDocs.get(docId) > RARE_WORDS_LOWER_BOUND) {
 					Map<String, Integer> similarDocTF = Application.getTermFrequencies(docId);
-					for(String temp : similarDocTF.keySet()) {
-						System.out.println("\""+temp+"\": "+similarDocTF.get(temp));
-					}
+//					for(String temp : similarDocTF.keySet()) {
+//						System.out.println("\""+temp+"\": "+similarDocTF.get(temp));
+//					}
 					RealVector simVector = createRealVector(similarDocTF,similarDocTF);
 					RealVector newDocVector = createRealVector(similarDocTF, currentTokens);
 					double cosSim = getCosineSimilarity(simVector, newDocVector);
-					System.out.println("(3) CosineSimilarity: "+cosSim);
 					if(cosSim > COSINUS_BOUND) {
 						try {
 							IndexSearcher searcher = Application.createSearcher();
 							topicHash = searcher.doc(docId).get("topichash");
 							searcher.getIndexReader().close();
+							System.out.println("   Cosinus-Abstand "+((int)(cosSim*100))/100f + " ueber Schwellwert. Aehnlich zu Thema: "+topicHash);
 							return topicHash;
 						} catch (IOException e) {
 							System.out.println("Algorithm: Error getting topicHash.");
 						}
-						
+					} else {
+						System.out.println("   Cosinus-Abstand "+((int)(cosSim*100))/100f + " zu wenig.");
 					}
 				}
 		    }
@@ -246,7 +255,7 @@ public class Algorithm {
 	}
 	
 	/**
-	 * Berechnet den Abstand zwischen zwei Vektoren und gibt ihn zur&uuml;ck
+	 * Berechnet den Cosinus-Abstand zwischen zwei Vektoren und gibt ihn zur&uuml;ck
 	 * @author Christian Ochsenk&uuml;hn
 	 * @param vec1 = Vector 1
 	 * @param vec2 = Vector 2
@@ -266,14 +275,48 @@ public class Algorithm {
 	private static RealVector createRealVector(Map<String, Integer> rootMap, Map<String, Integer> mapToVector) {
         RealVector vector = new ArrayRealVector(rootMap.size());
         int i = 0;
-        for (String term : rootMap.keySet()) {
-            int value = mapToVector.containsKey(term) ? mapToVector.get(term) : 0;
+        for (String term : rootMap.keySet()) {        	
+        	int value = 0;
+        	if(mapToVector.containsKey(term))
+        		value = mapToVector.get(term);
+        	
             vector.setEntry(i++, value);
         }
         return (RealVector) vector.mapDivide(vector.getL1Norm());
     }
 	
 	/**
+	 * Speichert einen &uuml;bergebenen Text temporär in einem eigenen Index, um davon die Termfrequenz abzuleiten.
+	 * @author Christian Ochsenk&uuml;hn
+	 * @param text = Text dessen Termfrequenz bekommen werden soll
+	 * @return Terme und jeweilige Anzahl des Vorkommens
+	 */
+	public static Map<String, Integer> getTFMap(String text) {
+		String tempIndex = "tempIndex";
+		try {
+			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,
+					new GermanAnalyzer(Version.LUCENE_46)).setSimilarity(new DefaultSimilarity());
+			iwc.setOpenMode(OpenMode.CREATE); // Index wird jedes mal überschrieben
+			IndexWriter writer = new IndexWriter(FSDirectory.open(new File(tempIndex)), iwc);
+			
+			Document doc = new Document();
+			FieldType type = new FieldType();
+			type.setIndexed(true);
+			type.setStored(false);
+			type.setStoreTermVectors(true);
+			doc.add(new Field("text", text, type));
+			writer.addDocument(doc);
+			writer.close();
+			
+			return Application.getTermFrequencies(0, new File(tempIndex));
+		} catch (IOException e) {
+			System.out.println("Probleme beim Erstellen des temporären Index.");
+			return null;
+		}
+	}
+	
+	/**
+	 * [Funktion wird in aktueller Version nicht genutzt. Nutze stattdessen Algorithm.getTFMap(String text)]
 	 * Teilt gegebenen Text in Tokens und entfernt die Stopwords. Zählt das Vorkommen jedes Terms im Text.
 	 * @author Christian Ochsenk&uuml;hn
 	 * @param text = Text der geteilt werden soll
@@ -290,12 +333,12 @@ public class Algorithm {
 	    	tokenStream.reset();
 			while (tokenStream.incrementToken()) {
 			    String tok = tokenStream.getAttribute(CharTermAttribute.class).toString();
-			    try {  
+/*			    try {  
 			      Double.parseDouble(tok);
 			      continue;	// do not add numbers!
 			    } catch(NumberFormatException nfe)  {  
 			        // everything ok!
-			    }
+			    } */
 			    
 			    if(termFreq.containsKey(tok))
 			    	termFreq.put(tok, (termFreq.get(tok)+1));

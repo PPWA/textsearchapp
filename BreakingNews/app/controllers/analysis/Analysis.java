@@ -88,15 +88,15 @@ public class Analysis {
 				i++;
 				break;
 			case 2:
-				// Requirement 060-3 - Mehr-als Fünf-Seltene-Regel
-				System.out.println("(2) Pruefung Mehr-als-fuenf-Seltene-Regel ...");
+				// Requirement 060-3 - Mehr-als Fünfzehn-Seltene-Regel
+				System.out.println("(2) Pruefung Mehr-als-fuenfzehn-Seltene-Regel ...");
 				oldTopicHash = Algorithm.hasSimilarRareWords(text);
 				explanation = "Ähnliche Zusammenstellung seltener Begriffe in anderem Artikel vorhanden.";
 				i++;
 				break;
 			case 3:
-				// Requirement 060-4 - Zwei-bis-fünf-Seltene-Regel
-				System.out.println("(3) Pruefung Zwei-bis-fuenf-Seltene-Regel ...");
+				// Requirement 060-4 - Fünf-bis-fünfzehn-Seltene-Regel
+				System.out.println("(3) Pruefung Fuenf-bis-Fuenfzehn-Seltene-Regel ...");
 				oldTopicHash = Algorithm.hasSimilarBody(text);
 				explanation = "Geringe Distanz des Nachrichtentextes zu anderem Artikel.";
 				i++;
