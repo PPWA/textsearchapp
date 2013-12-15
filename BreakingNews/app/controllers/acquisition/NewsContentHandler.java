@@ -40,7 +40,6 @@ public class NewsContentHandler implements ContentHandler {
 		urlSource = "";
 		urlPicture = "";
 		textBuf = new StringBuffer();
-		titleBuf = new StringBuffer();
 	}
 
 	/**
@@ -94,6 +93,7 @@ public class NewsContentHandler implements ContentHandler {
 		}
 		if(localName.equals("title") && isInItem) {
 			isInTitle = true;
+			titleBuf = new StringBuffer();
 		} else if (localName.equals("enclosure") && isInItem) {	// picture-url
 			urlPicture = attr.getValue("url");
 		} else if (localName.equals("ExtractedText") && isInItem) {
@@ -110,17 +110,17 @@ public class NewsContentHandler implements ContentHandler {
 			throws SAXException {
 		
 		if(isInItem) {
-			if (localName.equals("pubDate") && isInItem) {
+			if (localName.equals("pubDate")) {
 				publicationDate = currentValue;
-			} else if (localName.equals("link") && isInItem) {	
+			} else if (localName.equals("link")) {	
 				urlSource = currentValue;
-			} else if (localName.equals("title") && isInItem) {			// article-title
+			} else if (localName.equals("title")) {			// article-title
 				isInTitle = false;
 			} else if (localName.equals("ExtractedText")) {
 				isExtractedText = false;
 			} 
 		} else {
-			if (localName.equals("title")) {							// newsPortal-title
+			if (localName.equals("title")) {				// newsPortal-title
 				newsPortal = currentValue;
 			}
 		}

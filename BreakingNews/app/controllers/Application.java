@@ -123,12 +123,25 @@ public class Application extends Controller {
 	}
 	
 	/**
-	 * Holt sich die Term-Frequenz eines bestimmten Dokuments und gibt diese zur&uuml;ck.
+	 * Holt sich die Term-Frequenz eines bestimmten Dokuments des Default-Index
+	 * und gibt diese zur&uuml;ck.
 	 * @author Christian Ochsenk&uuml;hn
 	 * @param docId: Dokumenten-Id im Index
 	 * @return Alle Terme inklusive Anzahl des Vorkommens im Dokument
 	 */
 	public static Map<String, Integer> getTermFrequencies(int docId) {
+		return getTermFrequencies(docId, file);
+	}
+	
+	/**
+	 * Holt sich die Term-Frequenz eines bestimmten Dokuments in einem bestimmten Index
+	 * und gibt diese zur&uuml;ck.
+	 * @author Christian Ochsenk&uuml;hn
+	 * @param docId: Dokumenten-Id im Index
+	 * @param file: Ort des zu analysierenden Index
+	 * @return Alle Terme inklusive Anzahl des Vorkommens im Dokument
+	 */
+	public static Map<String, Integer> getTermFrequencies(int docId, File file) {
 		try {
 			IndexReader reader = DirectoryReader.open(FSDirectory.open(file));
 			Terms vector = reader.getTermVector(docId, "text");
