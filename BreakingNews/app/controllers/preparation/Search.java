@@ -9,8 +9,12 @@ import java.util.List;
 
 import models.Newsportal;
 
+import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.TokenStream;
+import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.Term;
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.search.BooleanClause;
 import org.apache.lucene.search.BooleanQuery;
 import org.apache.lucene.search.IndexSearcher;
@@ -106,11 +110,11 @@ public class Search {
 	 * @return Eine Liste der aktuellsten Dokumente innerhalb des Suchzeitraumes
 	 *         mit neuen Themen
 	 */
-	public static List<Document> getDocumentsNewTopic(int offset, String keyword) {
+	public static List<Document> getDocumentsNewTopic(int offset, String phrase) {
 		String querystr = NEWTOPICQUERY;
 		String queryfield = "isNew";
 		return getResults(querystr, queryfield, offset, endNew, lastDocNew,
-				NEWTOPICQUERY, keyword);
+				NEWTOPICQUERY, phrase);
 	}
 
 	/**
@@ -230,13 +234,16 @@ public class Search {
 	 * @return Eine Liste der aktuellsten Dokumente, die allen Suchbedingungen entsprechen
 	 */
 	public static List<Document> getResults(String querystr, String queryfield,
-			int offset, boolean end, ScoreDoc lastDoc, String k, String keyword) {
+			int offset, boolean end, ScoreDoc lastDoc, String k, String phrase) {
 		try {
 			List<Document> documents = new ArrayList<Document>();
 			ScoreDoc[] hits = null;
 			Sort sort = new Sort(new SortField("date", SortField.Type.LONG,true)); // Sortierung
 			IndexSearcher searcher = Application.createSearcher();
-
+			Analyzer sa = Application.getAnalyzer();
+			TokenStream ts;
+			CharTermAttribute termAtt;
+			
 			// Erstellung der Suchanfrage
 			System.out.println("Suchanfrage an Lucene wird durchgefuehrt ...");
 			BooleanQuery booleanQuery = new BooleanQuery();
@@ -245,9 +252,16 @@ public class Search {
 					getLowerBound(), getUpperBound(), true, true); // Datum
 			booleanQuery.add(query1, BooleanClause.Occur.MUST);
 			booleanQuery.add(query2, BooleanClause.Occur.MUST);
-			if (!keyword.equals("")) {
-				Query query3 = new TermQuery(new Term("text", keyword)); //Suchbegriff
-				booleanQuery.add(query3, BooleanClause.Occur.MUST);
+			
+			if (!phrase.equals("")) { //Suchphrase
+				ts = sa.tokenStream("text",phrase);
+				termAtt = ts.addAttribute(CharTermAttribute.class); 
+				ts.reset();
+				while (ts.incrementToken()) {
+					Query query3 = new TermQuery(new Term("text",termAtt.toString())); 
+					booleanQuery.add(query3, BooleanClause.Occur.MUST);
+				}
+				ts.close();	
 			}
 			if (offset == 0) {
 				// Listenanfang
@@ -285,6 +299,7 @@ public class Search {
 			System.out.println("Suchergebnisse ermittelt!");
 			return documents;
 		} catch (Exception e) {
+			e.printStackTrace();
 			System.out.println("Fehler beim Ausfuehren der Suchanfrage");
 			return new ArrayList<Document>();
 		}

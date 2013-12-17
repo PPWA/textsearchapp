@@ -58,7 +58,7 @@ public class Preparation extends Controller {
 	 *         einem JSON-String, der die Meta-Daten der aktuellsten f&uuml;nf
 	 *         Beitr&auml;ge mit neuem Thema enth&auml;lt
 	 */
-	public static Result getNewTopics(String offsetS, String keyword) {
+	public static Result getNewTopics(String offsetS, String phrase) {
 		int offset;
 		ObjectNode response = Json.newObject();
 		ObjectNode result = Json.newObject();
@@ -75,7 +75,7 @@ public class Preparation extends Controller {
 			return ok(index.render(""));
 		}
 
-		documents = Search.getDocumentsNewTopic(offset, keyword);
+		documents = Search.getDocumentsNewTopic(offset, phrase);
 		System.out.println("JSON wird erzeugt ...");
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
