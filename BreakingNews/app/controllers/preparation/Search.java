@@ -186,7 +186,7 @@ public class Search {
 	public static List<Document> getAllResultsNewTopic() {
 		try {
 			List<Document> documents = new ArrayList<Document>();
-			Sort sort = new Sort(new SortField("date", SortField.Type.STRING,
+			Sort sort = new Sort(new SortField("newsportal", SortField.Type.STRING,
 					true));
 			ScoreDoc[] hits = null;
 			IndexSearcher searcher = Application.createSearcher();

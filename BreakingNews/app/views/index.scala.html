@@ -8,7 +8,7 @@
 			<h1>Early Bird News</h1>
 			<div style="clear:both;"></div>
 		</div>
-		<a id ="sprite" href="" onclick="refresh(), waitImage()" >
+		<a id ="sprite" href="" onclick="startSearch(0), waitImage()" >
 			<img id="btn_refresh" src="@routes.Assets.at("images/refresh.png")" alt="Refresh" />
 		</a>
 		<div style="clear:both;"></div>
@@ -17,7 +17,15 @@
 
 <div id="main_wrapper" class="wrapper">
 	<div id="main">
-					
+		<div id="article_list">
+		
+		</div>	
+		<a class="btn_newArticle" href="#" onclick="newArticles(1);return false " >
+			<div id="more_articles">
+				<span>Weitere Artikel</span>
+			
+			</div>
+		</a>		
 	</div>
 	
 	<aside id="right_column">

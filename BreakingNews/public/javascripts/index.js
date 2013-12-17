@@ -1,11 +1,11 @@
-init();
-refresh();
+startSearch(1);
 portals();
 
 /*Initialisieren der aktuellen Artikel*/
-function init(){ 
-	$("#main").html("");	
-	$.getJSON("/new-topics", function (data){ 
+function newArticles(i){ 
+	if(i==0){ $("#article_list").html(""); }
+		
+	$.getJSON("/new-topics?offset="+i, function (data){ 
 		$.each(data.articles, function(i,item) { 
 
 			var curArticle = " ";
@@ -30,11 +30,14 @@ function init(){
 				'<div style="clear:both;">'+'</div>';
 			
 			
-			$("#main").append("<article>" + curArticle + "</article>");
+			$("#article_list").append("<article>" + curArticle + "</article>");
 
 			}); 
+		if(data.articles.length == 0){
+			$("#more_articles span").html("Keine weiteren Artikel");
+			$("#more_articles").css("background-color", "red");
+		}
 	}); 
-	oldArticles();
 	
 }
 
@@ -54,8 +57,12 @@ $.getJSON("/old-topics", function (data){
 				'<p class="old_portal">'+ item["art_newportal"] +'</p>'+
 				'<p class="old_date">'+ item["art_date"]+ '<p>'+
 				'<div style="clear:both;"></div>'+
-			'</div>'+
-			'<hr />';		
+			'</div>';
+		
+		if (i < data.articles.length-1){
+			oldArticle +='<hr />';
+		}
+					
 
 		$("#old_news").append(oldArticle);
 
@@ -77,7 +84,7 @@ function similar(){
 			
 			alert("test");
 			
-			$("#main").append("<article>" + simArticle + "</article>");
+			$("#article_list").append("<article>" + simArticle + "</article>");
 			
 
 			}); 
@@ -85,10 +92,11 @@ function similar(){
 }
 
 /*Anfrage nach neuen Artikeln*/
-function refresh(){
+function startSearch(i){
 	$.getJSON("/start-search", function (data){ 
-		if (data.new_art_count != 0){
-			init();
+		if (data.new_art_count != 0 || i==1){
+			newArticles(0);
+			oldArticles();
 		}
 		
 	}); 

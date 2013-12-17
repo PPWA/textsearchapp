@@ -6,7 +6,7 @@ package models;
  * @author Sebastian Mandel
  * @version 1.0
  */
-public class Newsportal {
+public class Newsportal implements Comparable<Newsportal>{
 
 	/**
 	 * Bezeichnung des Newsportals
@@ -72,6 +72,13 @@ public class Newsportal {
 	 */
 	public void raise() {
 		this.anzahl++;
+	}
+
+	@Override
+	public int compareTo(Newsportal arg0) {
+		if(anzahl > arg0.anzahl) return -1;
+		else if (anzahl < arg0.anzahl) return 1;
+		else return 0;
 	}
 
 }

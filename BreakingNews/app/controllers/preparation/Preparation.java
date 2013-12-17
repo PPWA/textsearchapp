@@ -2,6 +2,7 @@ package controllers.preparation;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -199,6 +200,7 @@ public class Preparation extends Controller {
 		ObjectNode newsportal;
 		List<Newsportal> newsportalList = Search.getNewsportalList();
 		long timeStart = System.currentTimeMillis();
+		Collections.sort(newsportalList);
 		
 		System.out.println("JSON wird erzeugt ...");
 		for (int i = 0; i < newsportalList.size(); i++) {
