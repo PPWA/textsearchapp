@@ -1,11 +1,10 @@
 startSearch(1);
-portals();
 
 /*Initialisieren der aktuellen Artikel*/
-function newArticles(i){ 
-	if(i==0){ $("#article_list").html(""); }
+function newArticles(offset){ 
+	if(offset==0){ $("#article_list").html(""); }
 		
-	$.getJSON("/new-topics?offset="+i, function (data){ 
+	$.getJSON("/new-topics?offset="+offset, function (data){ 
 		$.each(data.articles, function(i,item) { 
 
 			var curArticle = " ";
@@ -33,40 +32,42 @@ function newArticles(i){
 			$("#article_list").append("<article>" + curArticle + "</article>");
 
 			}); 
-		if(data.articles.length == 0){
-			$("#more_articles span").html("Keine weiteren Artikel");
-			$("#more_articles").css("background-color", "red");
+		if(data.articles.length == 0) {
+			$("#main .btn_newArticle span").html("Keine weiteren Artikel vorhanden.");
+			$("#main .btn_newArticle:hover").css("background-color","#F00000");
+			$("#main .btn_newArticle").css("background-color","#F00000");
 		}
 	}); 
 	
 }
 
 /*Anzeige Alte Artikel*/
-function oldArticles(){
-$.getJSON("/old-topics", function (data){ 
-	$.each(data.articles, function(i,item) { 
-	
-		var oldArticle = " ";
+function oldArticles(offset){
+	if (offset==0) $("#article_list_old").html("");
+	$.getJSON("/old-topics?offset="+offset, function (data){ 
+		$.each(data.articles, function(i,item) { 
 		
-		oldArticle = 		
-			'<div class="old_art">'+
-				'<a href="'+ item["art_urlsource"]+ '" target="_new">'+
-				'<img class="img_rss" src="/assets/images/rss.png" alt="" />'+
-				'<h2>'+ item["art_title"] +'</h2>'+
-				'</a>'+
-				'<p class="old_portal">'+ item["art_newportal"] +'</p>'+
-				'<p class="old_date">'+ item["art_date"]+ '<p>'+
-				'<div style="clear:both;"></div>'+
-			'</div>';
-		
-		if (i < data.articles.length-1){
-			oldArticle +='<hr />';
-		}
-					
+			var oldArticle = " ";
+			if (i < data.articles.length && (i!=0 || offset==1)) oldArticle = '<hr />';		
+			
+			oldArticle += 		
+				'<div class="old_art">'+
+					'<a href="'+ item["art_urlsource"]+ '" target="_new">'+
+					'<img class="img_rss" src="/assets/images/rss.png" alt="" />'+
+					'<h2>'+ item["art_title"] +'</h2>'+
+					'</a>'+
+					'<p class="old_portal">'+ item["art_newportal"] +'</p>'+
+					'<p class="old_date">'+ item["art_date"]+ '<p>'+
+					'<div style="clear:both;"></div>'+
+				'</div>';				
 
-		$("#old_news").append(oldArticle);
-
+			$("#article_list_old").append(oldArticle);
 		}); 
+		if (data.articles.length == 0) {
+			$("#old_news .btn_newArticle span").html("Keine weiteren Artikel.");
+			$("#old_news .btn_newArticle:hover").css("background-color","#F00000");
+			$("#old_news .btn_newArticle").css("background-color","#F00000");
+		}
 	});
 }
 
@@ -96,9 +97,9 @@ function startSearch(i){
 	$.getJSON("/start-search", function (data){ 
 		if (data.new_art_count != 0 || i==1){
 			newArticles(0);
-			oldArticles();
-		}
-		
+			oldArticles(0);
+			portals();
+		}	
 	}); 
 	
 }

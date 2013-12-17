@@ -20,12 +20,14 @@
 		<div id="article_list">
 		
 		</div>	
-		<a class="btn_newArticle" href="#" onclick="newArticles(1);return false " >
-			<div id="more_articles">
-				<span>Weitere Artikel</span>
-			
+		<a class="btn_link" href="#" onclick="newArticles(1);return false " >
+			<div class="btn_newArticle">
+				<img src="@routes.Assets.at("images/arrow.png")"/>
+				<span>... Weitere Artikel laden ...</span>
+				<img src="@routes.Assets.at("images/arrow.png")"/>	
 			</div>
-		</a>		
+		</a>
+		<div id="footer">&copy; Hochschule Hof 2013</div>		
 	</div>
 	
 	<aside id="right_column">
@@ -40,14 +42,19 @@
 			</div>
 		</div>
 		
-		<div style="background-color:#fff;">
+		<div style="box-shadow: 0px 0px 7px #AAAAAA;background-color:#fff;">
 			<div class="art_header">
 				<img class="img_rss" src="@routes.Assets.at("images/old-news.png")" alt="" />
 				<h2>Night Owl News</h2>
 			</div>
 			
 			<div id="old_news">
-				
+				<div id="article_list_old"></div>
+				<a class="btn_link" href="#" onclick="oldArticles(1);return false">
+					<div class="btn_newArticle" style="border-radius: 0">
+						<span style="vertical-align: sub;">... Weitere Artikel laden ...</span>		
+					</div>
+				</a>	
 			</div>
 		</div>
 	</aside>
