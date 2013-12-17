@@ -3,7 +3,6 @@ startSearch(1);
 /*Initialisieren der aktuellen Artikel*/
 function newArticles(offset){ 
 	if(offset==0){ $("#article_list").html(""); }
-		
 	$.getJSON("/new-topics?offset="+offset, function (data){ 
 		$.each(data.articles, function(i,item) { 
 
@@ -24,7 +23,7 @@ function newArticles(offset){
 					'<p class="teaser">'+ item["art_teaser"] +'</p>'+
 				'</div>'
 				+ 
-				'<div class="art_time">'+'<p>'+ item["art_date"]+ '</p>'+'</div>'
+				'<div class="art_time">'+'<p><img class="calendar" src="/assets/images/calendar.png"/>'+ item["art_date"]+ '</p>'+'</div>'
 				+
 				'<div style="clear:both;">'+'</div>';
 			
@@ -94,13 +93,16 @@ function similar(){
 
 /*Anfrage nach neuen Artikeln*/
 function startSearch(i){
+	$("#btn_refresh").addClass("rotate");
 	$.getJSON("/start-search", function (data){ 
+		$("#btn_refresh").removeClass("rotate");
 		if (data.new_art_count != 0 || i==1){
 			newArticles(0);
 			oldArticles(0);
 			portals();
 		}	
 	}); 
+	$("#head_wrapper").css("display","true");
 	
 }
 
@@ -128,16 +130,3 @@ function portals(){
 		}); 
 	});
 }
-
-
-
-/*Laden des WaitImages*/
-
-var img = "/assets/images/waitBird.png";
-
-function waitImage(){
-	 spriteImage = document.getElementById("btn_refresh");
-	 spriteImage.src = img;
-	 alert("Neue Artikel geladen");
-}
-
