@@ -3,6 +3,9 @@ startSearch(1);
 /*Initialisieren der aktuellen Artikel*/
 function newArticles(offset){ 
 	if(offset==0){ $("#article_list").html(""); }
+	$("#main .btn_newArticle span").html("... Weitere Artikel laden ...");
+	$("#main .btn_newArticle").removeClass("void");
+
 	$.getJSON("/new-topics?offset="+offset, function (data){ 
 		$.each(data.articles, function(i,item) { 
 
@@ -31,10 +34,9 @@ function newArticles(offset){
 			$("#article_list").append("<article>" + curArticle + "</article>");
 
 			}); 
-		if(data.articles.length == 0) {
+		if (data.articles.length == 0) {
 			$("#main .btn_newArticle span").html("Keine weiteren Artikel vorhanden.");
-			$("#main .btn_newArticle:hover").css("background-color","#F00000");
-			$("#main .btn_newArticle").css("background-color","#F00000");
+			$("#main .btn_newArticle").addClass("void");
 		}
 	}); 
 	
@@ -43,6 +45,9 @@ function newArticles(offset){
 /*Anzeige Alte Artikel*/
 function oldArticles(offset){
 	if (offset==0) $("#article_list_old").html("");
+	$("#old_news .btn_newArticle span").html("... Weitere Artikel laden ...");
+	$("#old_news .btn_newArticle").removeClass("void");
+
 	$.getJSON("/old-topics?offset="+offset, function (data){ 
 		$.each(data.articles, function(i,item) { 
 		
@@ -64,8 +69,7 @@ function oldArticles(offset){
 		}); 
 		if (data.articles.length == 0) {
 			$("#old_news .btn_newArticle span").html("Keine weiteren Artikel.");
-			$("#old_news .btn_newArticle:hover").css("background-color","#F00000");
-			$("#old_news .btn_newArticle").css("background-color","#F00000");
+			$("#old_news .btn_newArticle").addClass("void");
 		}
 	});
 }
