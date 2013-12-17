@@ -111,7 +111,8 @@ public class NewsContentHandler implements ContentHandler {
 		
 		if(isInItem) {
 			if (localName.equals("pubDate")) {
-				publicationDate = currentValue;
+				if(currentValue!="")
+					publicationDate = currentValue;
 			} else if (localName.equals("link")) {	
 				urlSource = currentValue;
 			} else if (localName.equals("title")) {			// article-title
@@ -122,6 +123,8 @@ public class NewsContentHandler implements ContentHandler {
 		} else {
 			if (localName.equals("title")) {				// newsPortal-title
 				newsPortal = currentValue;
+			} else if (localName.equals("pubDate")) {
+				publicationDate = currentValue;
 			}
 		}
 	}

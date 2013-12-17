@@ -3,7 +3,6 @@ package controllers.analysis;
 import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -32,7 +31,6 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.search.similarities.DefaultSimilarity;
-import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.Version;
 
@@ -48,9 +46,9 @@ import controllers.preparation.Search;
 public class Algorithm {
 
 	// Prozentuales Vorkommen in allen Dokumenten, ab der ein Wort noch als selten gilt:
-	private final static float RARE_APPEARANCE = (float) 0.05; // = 5%
+	private final static float RARE_APPEARANCE = (float) 0.03; // = 3%
 	// Anzahl der seltenen Wörter, ab der ein Dokument als selbes Thema angesehen wird:
-	private final static int RARE_WORDS_UPPER_BOUND = 15;
+	private final static int RARE_WORDS_UPPER_BOUND = 20;
 	// Anzahl der seltenen Wörter, ab der ein Dokument eventuell dem selben Thema zugehören könnte:
 	private final static int RARE_WORDS_LOWER_BOUND = 5;
 	// Schwellwert, ab dem der Cosinus-Abstand zweier Vektoren dasselbe Thema annimmt:
@@ -149,6 +147,8 @@ public class Algorithm {
 //		System.out.println("rareRangeMax: "+rareRangeMax);
 		
 		currentTokens = getTFMap(text);
+		if(currentTokens==null)
+			return "";
 		
 		IndexSearcher searcher = Application.createSearcher();
 		Query query2 = NumericRangeQuery.newLongRange("date",Search.getLowerBound(), Search.getUpperBound(), true, true);
@@ -181,9 +181,9 @@ public class Algorithm {
 							if(++temp >= RARE_WORDS_UPPER_BOUND) {
 	//							System.out.println("More than "+RARE_WORDS_UPPER_BOUND+" rare words in document >>> Old Topic");
 								String hash = searcher.doc(hits[j].doc).get("topichash");
-	//							System.out.println("Similar with :"+searcher.doc(hits[j].doc).get("title"));
-								searcher.getIndexReader().close();
 								System.out.println("   Aehnlich zu Thema " + hash);
+//								System.out.println("   Aehnlich zu Artikel: "+searcher.doc(hits[j].doc).get("title"));
+								searcher.getIndexReader().close();
 								return hash;
 							}
 	//						System.out.println("Doc #"+hits[j].doc+" contains "+temp+" rare words.");
@@ -198,6 +198,7 @@ public class Algorithm {
 				
 			} catch (IOException | NullPointerException e) {
 				System.out.println("hasSimilarRareWords fehlgeschlagen da Index nicht vorhanden.");
+				return "";
 			} 
 		}
 		try {
@@ -220,7 +221,7 @@ public class Algorithm {
 	 */
 	public static String hasSimilarBody(String text) {
 		String topicHash = "";
-		if(maybeSimilarDocs!=null) {
+		if(maybeSimilarDocs!=null && currentTokens!=null) {
 			// Iteriert jedes Dokument, welches seltene Begriffe enthält:
 			for(int docId : maybeSimilarDocs.keySet())
 		    {
