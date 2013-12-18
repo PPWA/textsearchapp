@@ -106,6 +106,15 @@ body {
             vertical-align: middle;
         }
         
+        .shows_similar{
+            padding: 6px;
+        }
+
+        .shows_similar img{
+            width: 11px;
+            margin-right: 4px;
+            margin-bottom: -1px;
+        }
 
         /* Formatierung Button fuer mehr Artikel*/
 

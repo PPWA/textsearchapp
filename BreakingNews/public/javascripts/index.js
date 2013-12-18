@@ -28,7 +28,11 @@ function newArticles(offset){
 				+ 
 				'<div class="art_time">'+'<p><img class="calendar" src="/assets/images/calendar.png"/>'+ item["art_date"]+ '</p>'+'</div>'
 				+
-				'<div style="clear:both;">'+'</div>';
+				'<div style="clear:both;">'+'</div>'+
+				'<a href="#" onclick="similarArticle(\''+ item["art_topichash"]+'\')">'+
+				'<div class="shows_similar">'+
+				'<img src="/assets/images/plus.png"/>Ähnliche Artikel</div></a>'+
+				'<div id="'+ item["art_topichash"]+'"><ul></ul></div>'+'<div style="clear:both;">';
 			
 			
 			$("#article_list").append("<article>" + curArticle + "</article>");
@@ -75,20 +79,23 @@ function oldArticles(offset){
 }
 
 /*Ähnliche Artikel*/
-function similar(){
-	$.getJSON("/similar-articles", function (data){ 
-		$.each(data.articles, function(i,item) { 
-		
+function similarArticle(topichash){
+	$.getJSON("/similar-articles?topichash="+topichash, function (data){ 		
+		$.each(data.articles, function(i,item) { 		
+			
 			var simArticle = " ";
 			
 			simArticle = 
-				'<div class="art_similar">'+
-				'<a href="" target="_new">'+
-				'<p>'+'<img src="/assets/images/plus.png" alt="" />'+ '</p>'+'</a>'+'</div>';		
+				'<li>'+
+				'<a href="'+ item["art_urlsource"]+ '" target="_new">'+
+				item["art_title"]+'<br>'+item["art_date"]
+				+
+				'</a>'+
+				'</li>';		
 			
-			alert("test");
 			
-			$("#article_list").append("<article>" + simArticle + "</article>");
+			
+			$("#"+topichash+" ul").append(simArticle);
 			
 
 			}); 
