@@ -3,9 +3,10 @@ startSearch(1);
 
 /*Initialisieren der aktuellen Artikel*/
 function newArticles(offset,phrase){ 
-	if(offset==0){ $("#article_list").html(""); }
+	if(offset==0){ $("#article_list").html(""); $("#main .btn_newArticle").hide(); }
 	$("#main .btn_newArticle span").html("... Weitere Artikel laden ...");
 	$("#main .btn_newArticle").removeClass("void");
+	
 
 	$("#btn_refresh").addClass("rotate");
 	$.getJSON("/new-topics?offset="+offset+"&keyword="+phrase, function (data){ 
@@ -38,15 +39,15 @@ function newArticles(offset,phrase){
 				
 				$("#article_list").append("<article style=\"display:none\">" + curArticle + "</article>");
 				//$("article").show( 'blind', {}, 550);
-				$("article").fadeIn(750);
+				$("article").fadeIn(750,function(){$("#main .btn_newArticle").show();});
 
 			}); 
 		if (data.articles.length == 0) {
+			$("#main .btn_newArticle").show();
 			$("#main .btn_newArticle span").html("Keine weiteren Artikel vorhanden.");
 			$("#main .btn_newArticle").addClass("void");
 		}
 	}); 
-	
 }
 
 /*Anzeige Alte Artikel*/
@@ -79,7 +80,7 @@ function oldArticles(offset){
 			$("#old_news .btn_newArticle").addClass("void");
 		}
 				if (offset == 0) {
-			$( ".old_art" ).show( 'slide', {}, 500);
+			setTimeout(function(){$( ".old_art" ).show( 'slide', {duration:1500, easing:'easeOutElastic'})},550);
 		}
 		else {
 			$( ".old_art" ).fadeIn();
@@ -123,32 +124,33 @@ function startSearch(i){
 			portals();
 		}	
 	}); 
-	$("#head_wrapper").css("display","true");
-	
 }
 
-
-
 /*Statistik*/
-function portals(){
-	$("#portals").html();
+function portals() {
+	$('#portals').html("");
 	$.getJSON("/news-portals", function (data){ 
-		$.each(data.newsportals, function(i,item) { 
-			var portal = " ";
-					
-			portal =				
-			'<table id="bar">'+
-			    '<tbody>'+
-			        '<tr class="bar"><th>' + item["np_name"] +
-			        '</th><td><div style="width:' + item["np_count"] +'px;">&nbsp;</div>' + item["np_count"] +'</td></tr>'+
-			    '</tbody>'
-			+
-			'</table>';
-			
-			
-			$("#portals").append(portal);
+		gesamt = 0;
+		max = 0;
+		$.each(data.newsportals, function(i,item) {
+			gesamt = gesamt + item["np_count"];
+			if(item["np_count"] > max) max = item["np_count"];
+		});
+		$.each(data.newsportals, function(i,item) {
+			if (i == 5) return false;
+			calcRelative = Math.round(100/max * item["np_count"]);
+			calcAbsolute = Math.round(100/gesamt * item["np_count"]);
+			addClass = '';
+			if (item["np_count"] == max) addClass = ' bestPortal';
 
-		}); 
+			titel = item["np_name"] + " (" + item["np_count"] +")";
+			portal = 	'<div title="' + titel + '" class="portal' + addClass + '" style="display:none;width:' + calcRelative + '%;">' +
+							'<p style="display:none">' + titel + '</p>'+
+						'</div><div style="display:none" class="prozent">' + calcAbsolute + '%</div><div style="clear:both"></div>';
+			$('#portals').append(portal);
+			setTimeout(function(){$(".portal").show( 'slide',{duration:1500, easing:'easeOutBounce'});$(".prozent").show( 'slide',{duration:1500, easing:'easeOutExpo'}, function(){$(".portal p").show();})},650);
+
+		});
 	});
 }
 
