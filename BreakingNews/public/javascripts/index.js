@@ -167,7 +167,12 @@ function posSimOverlay(event) {
 function loadIframe(url) {
 	$("#extern_article").hide();
 	$("iframe").attr("src",url);
-	$("#extern_article").css("top",window.pageYOffset+55);
+	if(window.innerHeight > 700) {
+		$("#extern_article").css("top",window.innerHeight/2-350+pageYOffset);
+	}
+	else {
+		$("#extern_article").css("top",pageYOffset+55);	
+	}
 	$("#extern_article").css("left",window.innerWidth/2-500);
 	$("#extern_article").show( 'fold', {}, 850);
 }
