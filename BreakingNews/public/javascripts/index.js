@@ -28,16 +28,20 @@ function newArticles(offset){
 				+ 
 				'<div class="art_time">'+'<p><img class="calendar" src="/assets/images/calendar.png"/>'+ item["art_date"]+ '</p>'+'</div>'
 				+
-				'<div style="clear:both;">'+'</div>'+
-				'<a href="#" onclick="similarArticle(\''+ item["art_topichash"]+'\')">'+
-				'<div class="shows_similar">'+
-				'<img src="/assets/images/plus.png"/>Ähnliche Artikel</div></a>'+
+				'<div style="clear:both;">'+'</div>'
+				+
+				'<a href="#" onclick="similarArticle(\''+ item["art_topichash"]+'\')">'
+				+
+				'<div class="shows_similar">'
+				+
+				'<img src="/assets/images/plus.png"/>Ähnliche Artikel</div></a>'
+				+
 				'<div id="'+ item["art_topichash"]+'"><ul></ul></div>'+'<div style="clear:both;">';
-			
 			
 			$("#article_list").append("<article>" + curArticle + "</article>");
 
 			}); 
+		
 		if (data.articles.length == 0) {
 			$("#main .btn_newArticle span").html("Keine weiteren Artikel vorhanden.");
 			$("#main .btn_newArticle").addClass("void");
@@ -45,6 +49,7 @@ function newArticles(offset){
 	}); 
 	
 }
+
 
 /*Anzeige Alte Artikel*/
 function oldArticles(offset){
@@ -59,24 +64,34 @@ function oldArticles(offset){
 			if (i < data.articles.length && (i!=0 || offset==1)) oldArticle = '<hr />';		
 			
 			oldArticle += 		
-				'<div class="old_art">'+
-					'<a href="'+ item["art_urlsource"]+ '" target="_new">'+
-					'<img class="img_rss" src="/assets/images/rss.png" alt="" />'+
-					'<h2>'+ item["art_title"] +'</h2>'+
-					'</a>'+
-					'<p class="old_portal">'+ item["art_newportal"] +'</p>'+
-					'<p class="old_date">'+ item["art_date"]+ '<p>'+
-					'<div style="clear:both;"></div>'+
+				'<div class="old_art">'
+				+
+					'<a href="'+ item["art_urlsource"]+ '" target="_new">'
+					+
+					'<img class="img_rss" src="/assets/images/rss.png" alt="" />'
+					+
+					'<h2>'+ item["art_title"] +'</h2>'
+					+
+					'</a>'
+					+
+					'<p class="old_portal">'+ item["art_newportal"] +'</p>'
+					+
+					'<p class="old_date">'+ item["art_date"]+ '<p>'
+					+
+					'<div style="clear:both;"></div>'
+					+
 				'</div>';				
 
 			$("#article_list_old").append(oldArticle);
 		}); 
+		
 		if (data.articles.length == 0) {
 			$("#old_news .btn_newArticle span").html("Keine weiteren Artikel.");
 			$("#old_news .btn_newArticle").addClass("void");
 		}
 	});
 }
+
 
 /*Ähnliche Artikel*/
 function similarArticle(topichash){
@@ -86,37 +101,37 @@ function similarArticle(topichash){
 			var simArticle = " ";
 			
 			simArticle = 
-				'<li>'+
-				'<a href="'+ item["art_urlsource"]+ '" target="_new">'+
+				'<li>'
+				+
+				'<a href="'+ item["art_urlsource"]+ '" target="_new">'
+				+
 				item["art_title"]+'<br>'+item["art_date"]
 				+
-				'</a>'+
-				'</li>';		
+				'</a>'
+				+
+				'</li>';
 			
-			
-			
-			$("#"+topichash+" ul").append(simArticle);
-			
-
+			$("#"+topichash+" ul").append(simArticle);			
 			}); 
 		});	
 }
+
 
 /*Anfrage nach neuen Artikeln*/
 function startSearch(i){
 	$("#btn_refresh").addClass("rotate");
 	$.getJSON("/start-search", function (data){ 
 		$("#btn_refresh").removeClass("rotate");
+		
 		if (data.new_art_count != 0 || i==1){
 			newArticles(0);
 			oldArticles(0);
 			portals();
 		}	
 	}); 
-	$("#head_wrapper").css("display","true");
 	
+	$("#head_wrapper").css("display","true");	
 }
-
 
 
 /*Statistik*/
@@ -127,17 +142,20 @@ function portals(){
 			var portals = " ";
 					
 			portals =				
-			'<table id="bar">'+
-			    '<tbody>'+
-			        '<tr class="bar"><th>' + item["np_name"] +
-			        '</th><td><div style="width:' + item["np_count"] +'px;">&nbsp;</div>' + item["np_count"] +'</td></tr>'+
+			'<table id="bar">'
+				+
+			    '<tbody>'
+				+
+			        '<tr class="bar"><th>' + item["np_name"] 
+				+
+			        '</th><td><div style="width:' + item["np_count"] +'px;">&nbsp;</div>' 
+			        + item["np_count"] +'</td></tr>'
+			    +
 			    '</tbody>'
-			+
-			'</table>';
-			
+			    +
+			'</table>';			
 			
 			$("#portals").append(portals);
-
 		}); 
 	});
 }
