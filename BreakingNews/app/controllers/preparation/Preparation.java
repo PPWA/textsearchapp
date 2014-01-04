@@ -170,6 +170,9 @@ public class Preparation extends Controller {
 		for (int i = 0; i < documents.size(); i++) {
 			article = Json.newObject();
 			document = documents.get(i);
+			//um den Beitrag selbst, zu dem ähnliche Beiträge gefunden werden sollen, auszuschließen
+			if (document.get("isNew").equals("1")) continue;
+			
 			article.put("art_title", document.get("title"));
 			article.put("art_teaser", document.get("teaser"));
 			article.put("art_date", LDateToJSDate(document.get("date")));
@@ -177,6 +180,7 @@ public class Preparation extends Controller {
 			article.put("art_urlpicture", document.get("urlpicture"));
 			article.put("art_newportal", document.get("newsportal"));
 			article.put("art_topichash", document.get("topichash"));
+			article.put("art_explanation", document.get("explanation"));
 			articles.add(article);
 		}
 		String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);

@@ -4,23 +4,37 @@
 <header>
 	<div id="head_wrapper" class="wrapper">
 		<div id="logo">
-			<img src="@routes.Assets.at("images/logo.png")" alt="" />
-			<h1>Early Bird News</h1>
+			<a href="/"><img src="@routes.Assets.at("images/logo.png")" alt="" />
+			<h1>Early Bird News</h1></a>
 			<div style="clear:both;"></div>
 		</div>
 		<a id ="sprite" href="" onclick="startSearch(0);return false;" >
-			<img id="btn_refresh" src="@routes.Assets.at("images/refresh.png")" alt="Refresh" />
+			<img id="btn_refresh" title="Suche nach neuen Artikeln starten" src="@routes.Assets.at("images/refresh.png")" alt="Refresh" />
 		</a>
 		<div style="clear:both;"></div>
 	</div>
 </header>
+
+
+  <div class="overlay" id="similar_overlay">
+	<h2>&Auml;hnliche Artikel</h2><img src="/assets/images/plus.png" onclick="$('#similar_overlay').fadeOut();"/><div style="clear:both"></div>
+	<ul></ul>
+  </div>
+
+  <div class="overlay" id="extern_article">
+  	<h2>Ansicht des Originalartikels</h2><img src="/assets/images/plus.png" onclick="$('#extern_article').fadeOut();"/><div style="clear:both"></div>
+	<iframe sandbox="" src=""></iframe>
+  </div>
+
+
+
 
 <div id="main_wrapper" class="wrapper">
 	<div id="main">
 		<div id="article_list">
 		
 		</div>
-		<a class="btn_link" href="#" onclick="newArticles(1);return false " >
+		<a class="btn_link" href="#" onclick="newArticles(1,$('#search_field input').val());return false;" >
 			<div class="btn_newArticle">
 				<img src="@routes.Assets.at("images/arrow.png")"/>
 				<span>... Weitere Artikel laden ...</span>
@@ -29,7 +43,12 @@
 		</a>
 		<div id="footer">&copy; Hochschule Hof 2013</div>		
 	</div>
-	
+	<div id="search_field">
+		<input title="Bitte geben Sie hier einen oder mehrere Suchbegriffe ein." onkeydown="if (event.keyCode == 13) newArticles(0,$('#search_field input').val());" type="text"/>
+		<a href="#" onclick="newArticles(0,$('#search_field input').val());return false;">
+			<img title ="Suchergebnisse filtern" src="/assets/images/magnifier.png"/>
+		</a>
+	</div>
 	<aside id="right_column">
 		<div id="newsportals">
 			<div class="art_header">

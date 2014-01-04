@@ -142,7 +142,6 @@ public class Analysis {
 			isNew = Search.OLDTOPICQUERY;
 			topicHash = oldTopicHash;
 		}
-
 		Document doc = new Document();
 		System.out.println("Lege Artikel im Index ab ...");
 		try {
