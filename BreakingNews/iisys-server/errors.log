@@ -1,0 +1,14 @@
+Tue, 07 Jan 2014 10:58:46 CET: class RSSThread, method readSourceFile, Ignoring invalid URI: www.main-netz.de/rss/kultur.xml
+Tue, 07 Jan 2014 10:58:50 CET: class RSSThread, method processSubscription, Writing file for subscription failed: C:/User/Richard/Projekte/RSSArchive/RSS/viewernotification/File1389088730977.txt
+Tue, 07 Jan 2014 10:59:02 CET: class RSSThread, method processSubscription, Writing file for subscription failed: C:/User/Richard/Projekte/RSSArchive/RSS/viewernotification/File1389088742182.txt
+Tue, 07 Jan 2014 10:59:13 CET: class RSSThread, method processSubscription, Writing file for subscription failed: C:/User/Richard/Projekte/RSSArchive/RSS/viewernotification/File1389088753544.txt
+Tue, 07 Jan 2014 10:59:18 CET: class RSSThread, method processSubscription, Writing file for subscription failed: C:/User/Richard/Projekte/RSSArchive/RSS/viewernotification/File1389088758478.txt
+Tue, 07 Jan 2014 10:59:25 CET: class RSSThread, method processSubscription, Writing file for subscription failed: C:/User/Richard/Projekte/RSSArchive/RSS/viewernotification/File1389088765966.txt
+Tue, 07 Jan 2014 10:59:34 CET: class RSSThread, method processSubscription, Writing file for subscription failed: C:/User/Richard/Projekte/RSSArchive/RSS/viewernotification/File1389088774764.txt
+Tue, 07 Jan 2014 11:01:14 CET: class RSSThread, method processSubscription, Writing file for subscription failed: C:/User/Richard/Projekte/RSSArchive/RSS/viewernotification/File1389088874348.txt
+Tue, 07 Jan 2014 11:02:42 CET: class RSSThread, method processSubscription, Writing file for subscription failed: C:/User/Richard/Projekte/RSSArchive/RSS/viewernotification/File1389088962387.txt
+Tue, 07 Jan 2014 11:02:53 CET: class RSSThread, method processSubscription, Writing file for subscription failed: C:/User/Richard/Projekte/RSSArchive/RSS/viewernotification/File1389088973403.txt
+Tue, 07 Jan 2014 11:03:01 CET: class RSSThread, method processSubscription, Writing file for subscription failed: C:/User/Richard/Projekte/RSSArchive/RSS/viewernotification/File1389088981983.txt
+Wed, 08 Jan 2014 11:33:44 CET: class RSSThread, method readSourceFile, Ignoring invalid URI: www.main-netz.de/rss/kultur.xml
+Wed, 08 Jan 2014 12:54:36 CET: class RSSThread, method readSourceFile, Ignoring invalid URI: www.main-netz.de/rss/kultur.xml
+Wed, 08 Jan 2014 14:59:47 CET: class RSSThread, method readSourceFile, Ignoring invalid URI: www.main-netz.de/rss/kultur.xml

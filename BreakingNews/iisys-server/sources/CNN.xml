@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="ASCII"?>
+
+<sites
+  xmlns="http://www.iisys.de/mmis/rssapp"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.iisys.de/mmis/rssapp RSSFeeds.xsd">
+
+  <address ttl="2" topic="business" country="US" language="en" link="  http://rss.cnn.com/rss/edition_business.rss"/>
+  <address ttl="2" topic="entertainment" country="US" language="en" link="http://rss.cnn.com/rss/edition_entertainment.rss"/>
+  <address ttl="2" topic="politics" country="US" language="en" link="http://rss.cnn.com/rss/edition.rss"/>
+  <address ttl="2" topic="science" country="US" language="en" link="http://rss.cnn.com/rss/edition_space.rss"/>
+  <address ttl="2" topic="technology" country="US" language="en" link="http://rss.cnn.com/rss/edition_technology.rss"/>
+  <address ttl="2" topic="sport" country="US" language="en" link=" http://rss.cnn.com/rss/edition_sport.rss"/>
+</sites>
+
+
+

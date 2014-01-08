@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="ASCII"?>
+
+<sites
+  xmlns="http://www.iisys.de/mmis/rssapp"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.iisys.de/mmis/rssapp RSSFeeds.xsd">
+
+  <address ttl="2" topic="politics" country="US" language="en" link="http://feeds.washingtonpost.com/rss/politics"/>
+  <address ttl="2" topic="sports" country="US" language="en" link="http://feeds.washingtonpost.com/rss/sports"/>
+
+</sites>
+
+
+
