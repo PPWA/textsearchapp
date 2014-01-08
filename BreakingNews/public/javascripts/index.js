@@ -4,7 +4,7 @@ autoReload();
 
 /*Prüft periodisch, ob Lucene-Index neue Artikel enthält*/
 function autoReload() {
-   setInterval(function(){startSearch(1)},5*60*1000);
+   setInterval(function(){startSearch(0)},1*60*1000);
 }
 
 
