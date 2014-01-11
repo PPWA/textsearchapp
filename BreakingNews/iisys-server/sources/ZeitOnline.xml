@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ASCII"?>
+
+<sites
+  xmlns="http://www.iisys.de/mmis/rssapp"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.iisys.de/mmis/rssapp RSSFeeds.xsd">
+
+  <address ttl="2" topic="business" country="germany" language="de" link="http://newsfeed.zeit.de/wirtschaft/index"/>
+  <address ttl="2" topic="career" country="germany" language="de" link="http://newsfeed.zeit.de/karriere/index"/>
+  <address ttl="2" topic="computer" country="germany" language="de" link="http://newsfeed.zeit.de/digital/index"/>
+  <address ttl="2" topic="culture" country="germany" language="de" link="http://newsfeed.zeit.de/kultur/index"/>
+  <address ttl="2" topic="lifestyle" country="germany" language="de" link="http://newsfeed.zeit.de/lebensart/index"/>
+  <address ttl="2" topic="mobility" country="germany" language="de" link="http://newsfeed.zeit.de/auto/index"/>
+  <address ttl="2" topic="opinion" country="germany" language="de" link="http://newsfeed.zeit.de/meinung/index"/>
+  <address ttl="2" topic="politics" country="germany" language="de" link="http://newsfeed.zeit.de/politik/index"/>
+  <address ttl="2" topic="science" country="germany" language="de" link="http://newsfeed.zeit.de/wissen/index"/>
+  <address ttl="2" topic="society" country="germany" language="de" link="http://newsfeed.zeit.de/gesellschaft/index"/>
+  <address ttl="2" topic="sport" country="germany" language="de" link="http://newsfeed.zeit.de/sport/index"/>
+  <address ttl="2" topic="study" country="germany" language="de" link="http://newsfeed.zeit.de/studium/index"/>
+  <address ttl="2" topic="travel" country="germany" language="de" link="http://newsfeed.zeit.de/reisen/index"/>
+</sites>
+
+
+

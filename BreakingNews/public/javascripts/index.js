@@ -1,4 +1,12 @@
 startSearch(1);
+autoReload();
+
+
+/*Prüft periodisch, ob Lucene-Index neue Artikel enthält*/
+function autoReload() {
+   setInterval(function(){startSearch(0)},1*60*1000);
+}
+
 
 /*Initialisieren der aktuellen Artikel*/
 function newArticles(offset,phrase){

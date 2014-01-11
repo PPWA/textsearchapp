@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="ASCII"?>
+
+<xsd:schema 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.iisys.de/mmis/rssapp"
+  xmlns="http://www.iisys.de/mmis/rssapp"
+  elementFormDefault="qualified">
+
+  <xsd:element name="subscription">
+    <xsd:complexType>
+      <xsd:sequence>
+
+        <xsd:element name="targetdir" minOccurs="1" maxOccurs="1">
+          <xsd:complexType>
+            <xsd:attribute name="path" type="xsd:string" use="required"/>
+          </xsd:complexType>
+        </xsd:element>
+
+        <xsd:element name="pattern" minOccurs="1" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:attribute name="country" type="xsd:string" use="optional"/>
+            <xsd:attribute name="language" type="xsd:language" use="optional"/>
+            <xsd:attribute name="source" type="xsd:string" use="optional"/>
+            <xsd:attribute name="topic" type="xsd:string" use="optional"/>
+            <xsd:attribute name="syear" type="xsd:positiveInteger" use="optional"/>
+            <xsd:attribute name="smonth" type="xsd:positiveInteger" use="optional"/>
+            <xsd:attribute name="sday" type="xsd:positiveInteger" use="optional"/>
+            <xsd:attribute name="eyear" type="xsd:positiveInteger" use="optional"/>
+            <xsd:attribute name="emonth" type="xsd:positiveInteger" use="optional"/>
+            <xsd:attribute name="eday" type="xsd:positiveInteger" use="optional"/>
+          </xsd:complexType>
+        </xsd:element>
+
+      </xsd:sequence>
+    </xsd:complexType> 
+  </xsd:element>
+</xsd:schema>

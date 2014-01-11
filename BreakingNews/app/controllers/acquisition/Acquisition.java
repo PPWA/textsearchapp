@@ -2,12 +2,19 @@ package controllers.acquisition;
 
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -33,6 +40,8 @@ public class Acquisition {
 	
 	private static final String DIR = "xmlFiles/";
 	
+	private static boolean isReading = false;
+	private static int articleCount = 0;
 	private static NewsContentHandler handl;
 	private static String latestXMLPath = "";	// Currently not used.
 												// Could be used to get new xml files when there are older (already read) files in the directory.
@@ -41,67 +50,128 @@ public class Acquisition {
 	public Acquisition() { }
 	
 	/**
-	 * Sucht nach neuen XML-Dateien im relevanten Ordner, liest diese - wenn vorhanden - aus, l&ouml;scht sie aus dem Ordner
-	 * und gibt im Play-Result die Anzahl der eingelesenen Dateien zur&uuml;ck.
-	 * @return Anzahl der eingelesenen Artikel (im JSON-Format als "new_art_count")
+	 * Gibt im Play-Result die Anzahl der seit dem letzten mal neu eingelesenen Dateien zur&uuml;ck.
+	 * @return Anzahl der seit letztem Aufruf neu eingelesenen Artikel (im JSON-Format als "new_art_count")
 	 */
 	public static Result startSearch() {
 		ObjectNode response = Json.newObject();
-//		StringBuffer buf = new StringBuffer(); // for testing
-		int articleCount = 0;
-		ArrayList<String> newXMLFiles = searchNewXMLFiles(DIR);
 		
-		if(newXMLFiles.isEmpty()) {
-			System.out.println("\nAcquisition: No new XML files found.");
-		} else {		
-			for(int i=0; i<newXMLFiles.size(); i++) {
-				handl = new NewsContentHandler();
-				
-				System.out.println("\nAcquisition: New File: "+newXMLFiles.get(i));
-				if(!readXMLFile(DIR+newXMLFiles.get(i), handl))
-					continue;
-				
-				while(!handl.hasStoppedReading()) {
-					try {
-						Thread.sleep(1000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-				
-//				showMeWhatYouGot(handl); 	// for testing
-				
-				Calendar threeMonthsAgo = Calendar.getInstance();
-				threeMonthsAgo.add(Calendar.MONTH, -3);
-				Date tempDate = handl.getPublicationDate();
-				if(tempDate.compareTo(threeMonthsAgo.getTime()) < 0) {
-					System.out.println("Acquisition: Article is older than three months and will not be analysed.");
-					deleteFile(DIR+newXMLFiles.get(i));
-					continue;
-				}
-				
-				String title = "Kein Titel";
-				if(!handl.getTitle().equals(""))
-					title = handl.getTitle();
-				
-				Analysis.addNewDocument(
-						title,
-						tempDate,
-						handl.getUrlSource(),
-						handl.getUrlPicture(),
-						handl.getText(),
-						handl.getTeaser(),
-						handl.getNewsPortal()); 
-				
-				articleCount++;
-				deleteFile(DIR+newXMLFiles.get(i));
-//				buf.append(handl.getXMLString()+"\n\n-----------------------------------------------\n\n\n");	// for testing
-			}
-//			System.out.println(buf.toString());	// for testing
-		}
+		if(articleCount==0)
+			searching();
+		
 		response.put("new_art_count", articleCount);
+		articleCount = 0;
 		return Results.ok(response);
-//		return Results.ok(buf.toString());	// for testing
+	}
+	
+	/**
+	 * Sucht nach neuen XML-Dateien im relevanten Ordner, liest diese - wenn vorhanden - aus.
+	 */
+	public static void searching() {
+		if(!isReading) {
+			//		StringBuffer buf = new StringBuffer(); // for testing
+					isReading = true;
+					
+					/* Nutze XMLfiles-Ordner für neue XML-Dateien:
+					 * 
+					 * ArrayList<String> newXMLFiles = searchNewXMLFiles(DIR);
+					 */		
+					
+					/* Nutze XMLfiles-Ordner als Subscription-Ordner mit txt-Dateien zu den XML-Pfaden */
+					ArrayList<String> newXMLFiles = getXMLpathsFromSubscription(DIR);
+					
+					if(newXMLFiles.isEmpty()) {
+						System.out.println("\nAcquisition: Keine neuen XML-Dateien gefunden.");
+					} else {		
+						for(int i=0; i<newXMLFiles.size(); i++) {
+							handl = new NewsContentHandler();
+							
+							System.out.println("\nNeue Datei: "+newXMLFiles.get(i));
+							if(!readXMLFile(newXMLFiles.get(i), handl))
+								continue;
+							
+							while(!handl.hasStoppedReading()) {
+								try {
+									Thread.sleep(1000);
+								} catch (InterruptedException e) {
+									e.printStackTrace();
+								}
+							}
+							
+			//				showMeWhatYouGot(handl); 	// for testing
+							
+							Calendar threeMonthsAgo = Calendar.getInstance();
+							threeMonthsAgo.add(Calendar.MONTH, -3);
+							Date tempDate = handl.getPublicationDate();
+							if(tempDate.compareTo(threeMonthsAgo.getTime()) < 0) {
+			//					System.out.println("Acquisition: Article is older than three months and will not be analysed.");
+								System.out.println("Acquisition: Der Artikel ist aelter als 3 Monate und wird nicht analysiert.");
+			
+								/* Achtung! Löscht XML-Datei aus dem angegebenen Ordner
+								 * Nur in Verbindung mit searchNewXMLFiles() nutzen	
+								 * 
+								 * deleteFile(newXMLFiles.get(i));
+								 */				
+								continue;
+							}
+							
+							String title = "Kein Titel";
+							if(!handl.getTitle().equals(""))
+								title = handl.getTitle();
+							
+							Analysis.addNewDocument(
+									title,
+									tempDate,
+									handl.getUrlSource(),
+									handl.getUrlPicture(),
+									handl.getText(),
+									handl.getTeaser(),
+									handl.getNewsPortal()); 
+							
+							articleCount++;
+							
+							/* Achtung! Löscht XML-Datei aus dem angegebenen Ordner
+							 * Nur in Verbindung mit searchNewXMLFiles() nutzen	
+							 * 
+							 * deleteFile(newXMLFiles.get(i));
+							 */
+							
+			//				buf.append(handl.getXMLString()+"\n\n-----------------------------------------------\n\n\n");	// for testing
+						}
+			//			System.out.println(buf.toString());	// for testing
+					}
+			//		return Results.ok(buf.toString());	// for testing
+					isReading = false;
+				}
+	}
+	
+	/**
+	 * 
+	 * @param directory
+	 * @return
+	 */
+	private static ArrayList<String> getXMLpathsFromSubscription(String directory) {
+		ArrayList<String> newXMLFiles = new ArrayList<String>();
+		
+		File file = new File(directory);
+		String[] txtFiles = file.list();
+		for(int i=0; i<txtFiles.length; i++) {			
+			if(txtFiles[i].endsWith(".txt")) {				
+				Path path = Paths.get(directory+txtFiles[i]);
+				try {
+					newXMLFiles.addAll(Files.readAllLines(path, StandardCharsets.UTF_8));
+				} catch (IOException e) {
+					System.out.println("Acquisition.java: txt-Subscription konnte nicht eingelesen werden.");
+				}
+			}
+			deleteFile(directory+txtFiles[i]);
+		}
+		
+		for(String str : newXMLFiles) {
+			System.out.println(str);
+		}
+		
+		return newXMLFiles;
 	}
 	
 	/**
@@ -118,9 +188,9 @@ public class Acquisition {
 		String[] xmlFiles = file.list();
 		for(int i=0; i<xmlFiles.length; i++) {			
 			if(xmlFiles[i].endsWith(".xml"))
-				newXMLFiles.add(xmlFiles[i]);
+				newXMLFiles.add(directory+xmlFiles[i]);
 			else {
-				System.out.println("Acquisition: "+xmlFiles[i]+" is not a xml file.");
+				System.out.println("Acquisition: "+xmlFiles[i]+" ist keine Xml-Datei.");
 				deleteFile(directory+xmlFiles[i]);
 			}
 		}
@@ -164,7 +234,8 @@ public class Acquisition {
 	private static boolean readXMLFile(String pathToFile, NewsContentHandler handl) {
 		try {
 			long timeStart = System.currentTimeMillis();
-			System.out.println("Acquisition: Start reading XML...");
+//			System.out.println("Acquisition: Start reading XML...");
+			System.out.println("Acquisition: Starte Lesen von XML...");
 			// Create reader
 			XMLReader xmlReader = XMLReaderFactory.createXMLReader();
 			
@@ -177,17 +248,21 @@ public class Acquisition {
 			xmlReader.parse(inputSource);
 			
 			String duration = String.valueOf((System.currentTimeMillis() - timeStart) / 1000.);
-			System.out.println("Acquisition: Succesfully read XML in "+duration+" seconds!");
+//			System.out.println("Acquisition: Succesfully read XML in "+duration+" seconds!");
+			System.out.println("Acquisition: XML erfolgreich in "+duration+" Sekunden gelesen!");
 			return true;
 		} catch (SAXException e) {
-			System.out.println("Acquisition: SAX-Error while parsing "+pathToFile);
+//			System.out.println("Acquisition: SAX-Error while parsing "+pathToFile);
+			System.out.println("Acquisition: SAX-Error beim Parsen von "+pathToFile);
 			handl.setIsEndOfDocument(true);
 			deleteFile(pathToFile);
 		} catch (FileNotFoundException e) {
-			System.out.println("Acquisition: Could not find "+pathToFile+"!");
+//			System.out.println("Acquisition: Could not find "+pathToFile+"!");
+			System.out.println("Acquisition: Konnte "+pathToFile+" nicht finden!");
 		} catch (IOException e) {
 			e.printStackTrace();
-			System.out.println("Acquisition: Input/Output-Error while parsing "+pathToFile);
+//			System.out.println("Acquisition: Input/Output-Error while parsing "+pathToFile);
+			System.out.println("Acquisition: Input/Output-Error beim Parsen von "+pathToFile);
 		}
 		return false;
 	}
@@ -201,8 +276,10 @@ public class Acquisition {
 	private static boolean deleteFile(String pathToFile) {
 		File tempFile = new File(pathToFile);
 		boolean deleteSuccess = tempFile.delete();
-		if(deleteSuccess) System.out.println("Acquisition: Successfully deleted "+pathToFile);
-		else System.out.println("Acquisition: Failed to delete "+pathToFile);
+//		if(deleteSuccess) System.out.println("Acquisition: Successfully deleted "+pathToFile);
+//		else System.out.println("Acquisition: Failed to delete "+pathToFile);
+		if(deleteSuccess) System.out.println("Acquisition: "+pathToFile+" erfolgreich geloescht.");
+		else System.out.println("Acquisition: Konnte "+pathToFile+" nicht entfernen.");
 		
 		return deleteSuccess;
 	}
@@ -219,5 +296,21 @@ public class Acquisition {
 //		System.out.println("Text: "+handl.getText());
 		System.out.println("Teaser: "+handl.getTeaser());
 		System.out.println("Portal: "+handl.getNewsPortal());
+	}
+
+	/**
+	 * Wenn true, dann l&auml;ft bereits ein Einlesevorgang und es kann gerade keine neues Einlesen ausgef&uuml;hrt werden.
+	 * @return Boolean-Wert, ob gerade eingelesen wird
+	 */
+	public static boolean isReading() {
+		return isReading;
+	}
+
+	/**
+	 * Soll auf true gesetzt werden, wenn gerade ein Einlesevorgang stattfindet.
+	 * @param isReading
+	 */
+	public static void setIsReading(boolean isReading) {
+		Acquisition.isReading = isReading;
 	}
 }

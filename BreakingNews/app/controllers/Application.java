@@ -21,6 +21,7 @@ import org.apache.lucene.store.FSDirectory;
 import org.apache.lucene.util.BytesRef;
 import org.apache.lucene.util.Version;
 
+import controllers.acquisition.RefreshThread;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.index;
@@ -32,6 +33,8 @@ import views.html.index;
  * @version 1.0
  */
 public class Application extends Controller {
+	
+	private static Thread refreshThread = new Thread( new RefreshThread() );
 
 	// inkl. StandardTokenizer, LowerCaseFilter, StopwortFilter
 	/**
@@ -165,12 +168,15 @@ public class Application extends Controller {
     }
 
 	/**
-	 * Gibt die Startseite zur&uuml;ck, sobald ein Client diese aufruft.
+	 * Gibt die Startseite zur&uuml;ck, sobald ein Client diese aufruft
+	 * und startet den Refresh-Thread.
 	 * 
 	 * @return Eine HTTP-Response mit Status-Code 200, dem MIMETYPE text/html
 	 *         und des HTML-Codes f&uuml;r die Startseite
 	 */
 	public static Result index() {
+		refreshThread = new Thread( new RefreshThread() );
+		refreshThread.start();
 		return ok(index.render("Home"));
 	}
 }

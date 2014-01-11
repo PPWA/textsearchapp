@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ASCII"?>
+
+<xsd:schema 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.iisys.de/mmis/rssapp"
+  xmlns="http://www.iisys.de/mmis/rssapp"
+  elementFormDefault="qualified">
+
+  <xsd:element name="sites">
+    <xsd:complexType>
+      <xsd:sequence>
+        <xsd:element name="address" minOccurs="1" maxOccurs="unbounded">
+          <xsd:complexType>
+            <xsd:attribute name="ttl" type="xsd:positiveInteger"/>
+            <xsd:attribute name="topic" type="xsd:string"/>
+            <xsd:attribute name="country" type="xsd:string"/>
+            <xsd:attribute name="language" type="xsd:language"/>
+            <xsd:attribute name="link" type="xsd:anyURI"/>
+          </xsd:complexType>
+        </xsd:element>
+      </xsd:sequence>
+    </xsd:complexType> 
+  </xsd:element>
+</xsd:schema>

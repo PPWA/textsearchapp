@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ASCII"?>
+
+<sites
+  xmlns="http://www.iisys.de/mmis/rssapp"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.iisys.de/mmis/rssapp RSSFeeds.xsd">
+
+  <address ttl="2" topic="career" country="germany" language="de" link="http://www.faz.net/rss/aktuell/beruf-chance/"/>
+  <address ttl="2" topic="culture" country="germany" language="de" link="http://www.faz.net/rss/aktuell/feuilleton/"/>
+  <address ttl="2" topic="finance" country="germany" language="de" link="http://www.faz.net/rss/aktuell/finanzen/"/>
+  <address ttl="2" topic="society" country="germany" language="de" link="http://www.faz.net/rss/aktuell/gesellschaft/"/>
+  <address ttl="2" topic="politics" country="germany" language="de" link="http://www.faz.net/rss/aktuell/politik/"/>
+  <address ttl="2" topic="travel" country="germany" language="de" link="http://www.faz.net/rss/aktuell/reise/"/>
+  <address ttl="2" topic="sport" country="germany" language="de" link="http://www.faz.net/rss/aktuell/sport/"/>
+  <address ttl="2" topic="technology" country="germany" language="de" link="http://www.faz.net/rss/aktuell/technik-motor/"/>
+  <address ttl="2" topic="business" country="germany" language="de" link="http://www.faz.net/rss/aktuell/wirtschaft/"/>
+  <address ttl="2" topic="science" country="germany" language="de" link="http://www.faz.net/rss/aktuell/wissen/"/>
+</sites>
+
+
+

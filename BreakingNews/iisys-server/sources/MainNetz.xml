@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="ASCII"?>
+
+<sites
+  xmlns="http://www.iisys.de/mmis/rssapp"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.iisys.de/mmis/rssapp RSSFeeds.xsd">
+
+  <address ttl="2" topic="politics" country="germany" language="de" link="http://www.main-netz.de/rss/politik.xml"/>
+  <address ttl="2" topic="culture" country="germany" language="de" link="www.main-netz.de/rss/kultur.xml"/>
+  <address ttl="2" topic="science" country="germany" language="de" link="http://www.main-netz.de/rss/wissenschaft.xml"/>
+
+</sites>
+
+
+

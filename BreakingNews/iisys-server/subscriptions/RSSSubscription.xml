@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ASCII"?>
+
+<subscription
+  xmlns="http://www.iisys.de/mmis/rssapp"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.iisys.de/mmis/rssapp RSSSubscription.xsd">
+
+  <targetdir path="C:/Users/chrisyeah/git/textsearchapp/BreakingNews/xmlFiles/"/>
+  <pattern country="germany"/>
+</subscription>
+
+
+

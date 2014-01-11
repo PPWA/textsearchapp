@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="ASCII"?>
+
+<subscription
+  xmlns="http://www.iisys.de/mmis/rssapp"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.iisys.de/mmis/rssapp RSSSubscription.xsd">
+
+  <targetdir path="C:/User/Richard/diverses/RSS/viewernotification/"/>
+  <pattern country="germany" language="de" topic="politics" source="SPIEGEL ONLINE - Politik" syear="2013" smonth="05" sday="20" eyear="2013" emonth="12" eday="31"/>
+</subscription>
+
+
+
