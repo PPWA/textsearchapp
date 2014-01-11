@@ -39,7 +39,7 @@ import play.mvc.Results;
 public class Acquisition {
 	
 	private static final String DIR = "xmlFiles/";
-	
+	private static int validMonthCount = 3;
 	private static boolean isReading = false;
 	private static int articleCount = 0;
 	private static NewsContentHandler handl;
@@ -101,7 +101,7 @@ public class Acquisition {
 			//				showMeWhatYouGot(handl); 	// for testing
 							
 							Calendar threeMonthsAgo = Calendar.getInstance();
-							threeMonthsAgo.add(Calendar.MONTH, -3);
+							threeMonthsAgo.add(Calendar.MONTH, -validMonthCount);
 							Date tempDate = handl.getPublicationDate();
 							if(tempDate.compareTo(threeMonthsAgo.getTime()) < 0) {
 			//					System.out.println("Acquisition: Article is older than three months and will not be analysed.");

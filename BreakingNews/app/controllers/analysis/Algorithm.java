@@ -44,7 +44,8 @@ import controllers.preparation.Search;
  * @version 1.0
  */
 public class Algorithm {
-
+	// Anzahl identischer Wörter im Titel, ab der ein gleiches Thema angenommen wird: 
+	private final static float SIMILAR_TITLE_WORDS_COUNT = 3; 
 	// Prozentuales Vorkommen in allen Dokumenten, ab der ein Wort noch als selten gilt:
 	private final static float RARE_APPEARANCE = (float) 0.03; // = 3%
 	// Anzahl der seltenen Wörter, ab der ein Dokument als selbes Thema angesehen wird:
@@ -118,7 +119,7 @@ public class Algorithm {
 						}
 					}
 				}
-				if (i >= 3) {
+				if (i >= SIMILAR_TITLE_WORDS_COUNT) {
 					topicHash = searcher.doc(hits[0].doc).get("topichash");
 					System.out.println("   Aehnlicher Titel gefunden: " + topicHash);
 				}	

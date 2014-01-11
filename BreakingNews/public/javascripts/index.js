@@ -1,10 +1,12 @@
+var deltaReloadClient = 1*60*1000;
+var portalsCount = 5;
 startSearch(1);
 autoReload();
 
 
 /*Prüft periodisch, ob Lucene-Index neue Artikel enthält*/
 function autoReload() {
-   setInterval(function(){startSearch(0)},1*60*1000);
+   setInterval(function(){startSearch(0)},deltaReloadClient);
 }
 
 
@@ -144,7 +146,7 @@ function portals() {
                         if(item["np_count"] > max) max = item["np_count"];
                 });
                 $.each(data.newsportals, function(i,item) {
-                        if (i == 5) return false;
+                        if (i == portalsCount) return false;
                         calcRelative = Math.round(100/max * item["np_count"]);
                         calcAbsolute = Math.round(100/gesamt * item["np_count"]);
                         addClass = '';

@@ -69,6 +69,10 @@ public class Search {
 	 * Anzahl der zu ermittelnden Suchergebnisse, wenn Liste mit Listenbeginn
 	 * startet
 	 */
+	private static int hitsPerAppend = 3;
+	/**
+	 * Anzahl der zu ermittelnden Suchergebnisse, wenn Liste fortgesetzt wird
+	 */
 	private static int hitsPerPage = 5;
 	/** Gibt in ganzen Tagen an, wie weit bei Suchanfragen in die Vergangenheit
 	 * zur&uuml;ckgeschaut werden soll
@@ -272,7 +276,7 @@ public class Search {
 				if (end) {
 					hits = null;
 				} else {
-					hits = searcher.searchAfter(lastDoc, booleanQuery, 3, sort).scoreDocs;
+					hits = searcher.searchAfter(lastDoc, booleanQuery, hitsPerAppend, sort).scoreDocs;
 				}
 			}
 			// Caching des jeweils letzten Dokuments der Suchanfrage, damit
