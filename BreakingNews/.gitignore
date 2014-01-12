@@ -21,3 +21,5 @@ dist
 /xmlFiles
 /iisys-server/archive
 /iisys-server/configuration.properties
+/iisys-server/error.log
+/iisys-server/subscriptions/RSSSubscription.xml
