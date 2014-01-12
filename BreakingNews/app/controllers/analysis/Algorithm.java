@@ -38,6 +38,7 @@ import controllers.Application;
 import controllers.preparation.Search;
 
 /**
+ * Enth&auml;lt verschiedene Analysemethoden, die auf die Meta-Daten eines Artikels angewendet werden, um darin neue oder bekannte Themen zu entdecken.
  * 
  * @author Christian Ochsenk&uuml;hn
  * @author Sebastian Mandel
