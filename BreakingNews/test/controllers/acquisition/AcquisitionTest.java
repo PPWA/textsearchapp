@@ -1,11 +1,19 @@
 package controllers.acquisition;
 
-import junit.framework.TestCase;
+import static org.junit.Assert.*;
 
-public class AcquisitionTest extends TestCase {
-	
-	public void testGetXMLpathsFromSubscription() {
-		
+import org.junit.Test;
+
+public class AcquisitionTest {
+
+	@Test
+	public void testStartSearch() {
+		fail("Not yet implemented");
+	}
+
+	@Test
+	public void testSearching() {
+		fail("Not yet implemented");
 	}
 
 }

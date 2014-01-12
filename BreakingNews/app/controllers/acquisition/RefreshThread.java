@@ -21,7 +21,7 @@ public class RefreshThread implements Runnable {
 			}
 			
 			System.out.print("\n *** Auto Server-Refresh ***");
-			if(!Acquisition.isReading())
+			if(!Acquisition.isSearching())
 				Acquisition.searching();
 		}
 	}

@@ -38,7 +38,7 @@ public class Acquisition {
 	
 	private static final String DIR = "xmlFiles/";
 	private static int VALID_MONTH_COUNT = 3;
-	private static boolean isReading = false;
+	private static boolean isSearching = false;
 	private static int articleCount = 0;
 	private static NewsContentHandler handl;
 	private static String latestXMLPath = "";	// Currently not used.
@@ -66,9 +66,9 @@ public class Acquisition {
 	 * Sucht nach neuen XML-Dateien im relevanten Ordner, liest diese - wenn vorhanden - aus.
 	 */
 	public static void searching() {
-		if(!isReading) {
+		if(!isSearching) {
 	//		StringBuffer buf = new StringBuffer(); // for testing
-			isReading = true;
+			isSearching = true;
 			
 			/* Nutze XMLfiles-Ordner für neue XML-Dateien:
 			 * 
@@ -138,14 +138,16 @@ public class Acquisition {
 				}
 	//			System.out.println(buf.toString());	// for testing
 			}
-			isReading = false;
+			isSearching = false;
 		}
 	}
 	
 	/**
-	 * 
+	 * Sucht im vorgegebenen Ordner nach Txt-Dateien (aus dem Abo des iisys-Crawlers) und liest dort
+	 * Pfade zu neuen XML-Artikeln aus.
 	 * @param directory
-	 * @return
+	 * 			Relative Pfadangabe des zu durchsuchenden Ordners (ausgehend vom Programm-Ursprung)
+	 * @return Name und Pfad der neuen XML-Artikel als Strings in einer ArrayList
 	 */
 	private static ArrayList<String> getXMLpathsFromSubscription(String directory) {
 		ArrayList<String> newXMLFiles = new ArrayList<String>();
@@ -299,15 +301,15 @@ public class Acquisition {
 	 * Wenn true, dann l&auml;ft bereits ein Einlesevorgang und es kann gerade keine neues Einlesen ausgef&uuml;hrt werden.
 	 * @return Boolean-Wert, ob gerade eingelesen wird
 	 */
-	public static boolean isReading() {
-		return isReading;
+	public static boolean isSearching() {
+		return isSearching;
 	}
 
 	/**
 	 * Soll auf true gesetzt werden, wenn gerade ein Einlesevorgang stattfindet.
 	 * @param isReading
 	 */
-	public static void setIsReading(boolean isReading) {
-		Acquisition.isReading = isReading;
+	public static void setIsSearching(boolean isSearching) {
+		Acquisition.isSearching = isSearching;
 	}
 }
