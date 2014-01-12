@@ -153,9 +153,9 @@ function portals() {
                         if (item["np_count"] == max) addClass = ' bestPortal';
 
                         titel = item["np_name"] + " (" + item["np_count"] +")";
-                        portal =         '<div title="' + titel + '" class="portal' + addClass + '" style="display:none;width:' + calcRelative + '%;">' +
-                                                        '<p style="display:none">' + titel + '</p>'+
-                                                '</div><div style="display:none" class="prozent">' + calcAbsolute + '%</div><div style="clear:both"></div>';
+                        portal = '<div title="' + titel + '" class="portal' + addClass + '" style="display:none;width:' + calcRelative + '%;">' +
+                                 '<p style="display:none">' + titel + '</p>'+
+                                 '</div><div style="display:none" class="prozent">' + calcAbsolute + '%</div><div style="clear:both"></div>';
                         $('#portals').append(portal);
                         setTimeout(function(){$(".portal").show( 'slide',{duration:1500, easing:'easeOutBounce'});$(".prozent").show( 'slide',{duration:1500, easing:'easeOutExpo'}, function(){$(".portal p").show();})},650);
 
