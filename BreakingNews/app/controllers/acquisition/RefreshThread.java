@@ -20,9 +20,11 @@ public class RefreshThread implements Runnable {
 				e.printStackTrace();
 			}
 			
-			System.out.print("\n *** Auto Server-Refresh ***");
+			System.out.println("*** Auto Server-Refresh ***");
 			if(!Acquisition.isSearching())
 				Acquisition.searching();
+			else
+				System.out.println("Auto Server-Refresh geblockt. Es wird bereits gelesen.");
 		}
 	}
 	

@@ -12,7 +12,7 @@ public class RefreshThreadTest {
 		refreshThread.start();
 		
 		try {
-			Thread.sleep(1*60*1000);
+			Thread.sleep(59999);
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}

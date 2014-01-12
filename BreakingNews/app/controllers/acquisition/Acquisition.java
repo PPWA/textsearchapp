@@ -69,12 +69,7 @@ public class Acquisition {
 		if(!isSearching) {
 	//		StringBuffer buf = new StringBuffer(); // for testing
 			isSearching = true;
-			
-			/* Nutze XMLfiles-Ordner für neue XML-Dateien:
-			 * 
-			 * ArrayList<String> newXMLFiles = searchNewXMLFiles(DIR);
-			 */		
-			
+							
 			/* Nutze XMLfiles-Ordner als Subscription-Ordner mit txt-Dateien zu den XML-Pfaden */
 			ArrayList<String> newXMLFiles = getXMLpathsFromSubscription(DIR);
 			
@@ -97,6 +92,9 @@ public class Acquisition {
 					}
 					
 	//				showMeWhatYouGot(handl); 	// for testing
+					
+					if(newXMLFiles.get(i).startsWith(DIR))
+						deleteFile(newXMLFiles.get(i));
 					
 					Calendar threeMonthsAgo = Calendar.getInstance();
 					threeMonthsAgo.add(Calendar.MONTH, -VALID_MONTH_COUNT);
@@ -128,12 +126,6 @@ public class Acquisition {
 					
 					articleCount++;
 					
-					/* Achtung! Löscht XML-Datei aus dem angegebenen Ordner
-					 * Nur in Verbindung mit searchNewXMLFiles() nutzen	
-					 * 
-					 * deleteFile(newXMLFiles.get(i));
-					 */
-					
 	//				buf.append(handl.getXMLString()+"\n\n-----------------------------------------------\n\n\n");	// for testing
 				}
 	//			System.out.println(buf.toString());	// for testing
@@ -145,6 +137,7 @@ public class Acquisition {
 	/**
 	 * Sucht im vorgegebenen Ordner nach Txt-Dateien (aus dem Abo des iisys-Crawlers) und liest dort
 	 * Pfade zu neuen XML-Artikeln aus.
+	 * Kann aber auch XML-Dateien im angegebenen Ordner finden und dessen Pfad zurückgeben.
 	 * @param directory
 	 * 			Relative Pfadangabe des zu durchsuchenden Ordners (ausgehend vom Programm-Ursprung)
 	 * @return Name und Pfad der neuen XML-Artikel als Strings in einer ArrayList
@@ -162,37 +155,19 @@ public class Acquisition {
 				} catch (IOException e) {
 					System.out.println("Acquisition.java: txt-Subscription konnte nicht eingelesen werden.");
 				}
+				deleteFile(directory+txtFiles[i]);
+			} else if(txtFiles[i].endsWith(".xml")) {
+				newXMLFiles.add(directory+txtFiles[i]);
+			} else {
+				System.out.println("Acquisition: "+txtFiles[i]+" besitzt keine akzeptierte Dateiendung.");
+				deleteFile(directory+txtFiles[i]);
 			}
-			deleteFile(directory+txtFiles[i]);
 		}
 		
 		for(String str : newXMLFiles) {
 			System.out.println(str);
 		}
 		
-		return newXMLFiles;
-	}
-	
-	/**
-	 * Sucht nach XML-Dateien im vorgegebenen Ordner und gibt deren Dateinamen zur&uuml;ck.
-	 * Dateien mit anderen Endungen werden aus dem Ordner entfernt.
-	 * @param directory
-	 * 			Relative Pfadangabe des zu durchsuchenden Ordners (ausgehend vom Programm-Ursprung)
-	 * @return Name der gefundenen XML-Dateien als Strings in einer ArrayList
-	 */
-	private static ArrayList<String> searchNewXMLFiles(String directory) {
-		ArrayList<String> newXMLFiles = new ArrayList<String>();
-		
-		File file = new File(directory);
-		String[] xmlFiles = file.list();
-		for(int i=0; i<xmlFiles.length; i++) {			
-			if(xmlFiles[i].endsWith(".xml"))
-				newXMLFiles.add(directory+xmlFiles[i]);
-			else {
-				System.out.println("Acquisition: "+xmlFiles[i]+" ist keine Xml-Datei.");
-				deleteFile(directory+xmlFiles[i]);
-			}
-		}
 		return newXMLFiles;
 	}
 

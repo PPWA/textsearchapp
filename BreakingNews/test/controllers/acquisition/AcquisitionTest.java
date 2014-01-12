@@ -4,16 +4,22 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import play.mvc.Result;
+
 public class AcquisitionTest {
 
-	@Test
+/*	@Test
 	public void testStartSearch() {
-		fail("Not yet implemented");
-	}
+		
+	} */
 
 	@Test
 	public void testSearching() {
-		fail("Not yet implemented");
+		assertTrue("Searching should not be blocked", !Acquisition.isSearching());
+		Acquisition.searching();
+		assertTrue("Searching should not be blocked", !Acquisition.isSearching());
 	}
 
 }
