@@ -2,11 +2,9 @@ package controllers.acquisition;
 
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -14,19 +12,19 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
-import controllers.analysis.Analysis;
 import play.libs.Json;
 import play.mvc.Result;
 import play.mvc.Results;
+
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import controllers.analysis.Analysis;
 
 /**
  * Sucht im Ordner "xmlFiles" nach neuen Artikeln im XML-Format, liest sie aus, l&ouml;scht sie aus dem Ordner
@@ -39,7 +37,7 @@ import play.mvc.Results;
 public class Acquisition {
 	
 	private static final String DIR = "xmlFiles/";
-	private static int validMonthCount = 3;
+	private static int VALID_MONTH_COUNT = 3;
 	private static boolean isReading = false;
 	private static int articleCount = 0;
 	private static NewsContentHandler handl;
@@ -69,80 +67,79 @@ public class Acquisition {
 	 */
 	public static void searching() {
 		if(!isReading) {
-			//		StringBuffer buf = new StringBuffer(); // for testing
-					isReading = true;
-					
-					/* Nutze XMLfiles-Ordner für neue XML-Dateien:
-					 * 
-					 * ArrayList<String> newXMLFiles = searchNewXMLFiles(DIR);
-					 */		
-					
-					/* Nutze XMLfiles-Ordner als Subscription-Ordner mit txt-Dateien zu den XML-Pfaden */
-					ArrayList<String> newXMLFiles = getXMLpathsFromSubscription(DIR);
-					
-					if(newXMLFiles.isEmpty()) {
-						System.out.println("\nAcquisition: Keine neuen XML-Dateien gefunden.");
-					} else {		
-						for(int i=0; i<newXMLFiles.size(); i++) {
-							handl = new NewsContentHandler();
-							
-							System.out.println("\nNeue Datei: "+newXMLFiles.get(i));
-							if(!readXMLFile(newXMLFiles.get(i), handl))
-								continue;
-							
-							while(!handl.hasStoppedReading()) {
-								try {
-									Thread.sleep(1000);
-								} catch (InterruptedException e) {
-									e.printStackTrace();
-								}
-							}
-							
-			//				showMeWhatYouGot(handl); 	// for testing
-							
-							Calendar threeMonthsAgo = Calendar.getInstance();
-							threeMonthsAgo.add(Calendar.MONTH, -validMonthCount);
-							Date tempDate = handl.getPublicationDate();
-							if(tempDate.compareTo(threeMonthsAgo.getTime()) < 0) {
-			//					System.out.println("Acquisition: Article is older than three months and will not be analysed.");
-								System.out.println("Acquisition: Der Artikel ist aelter als 3 Monate und wird nicht analysiert.");
+	//		StringBuffer buf = new StringBuffer(); // for testing
+			isReading = true;
 			
-								/* Achtung! Löscht XML-Datei aus dem angegebenen Ordner
-								 * Nur in Verbindung mit searchNewXMLFiles() nutzen	
-								 * 
-								 * deleteFile(newXMLFiles.get(i));
-								 */				
-								continue;
-							}
-							
-							String title = "Kein Titel";
-							if(!handl.getTitle().equals(""))
-								title = handl.getTitle();
-							
-							Analysis.addNewDocument(
-									title,
-									tempDate,
-									handl.getUrlSource(),
-									handl.getUrlPicture(),
-									handl.getText(),
-									handl.getTeaser(),
-									handl.getNewsPortal()); 
-							
-							articleCount++;
-							
-							/* Achtung! Löscht XML-Datei aus dem angegebenen Ordner
-							 * Nur in Verbindung mit searchNewXMLFiles() nutzen	
-							 * 
-							 * deleteFile(newXMLFiles.get(i));
-							 */
-							
-			//				buf.append(handl.getXMLString()+"\n\n-----------------------------------------------\n\n\n");	// for testing
+			/* Nutze XMLfiles-Ordner für neue XML-Dateien:
+			 * 
+			 * ArrayList<String> newXMLFiles = searchNewXMLFiles(DIR);
+			 */		
+			
+			/* Nutze XMLfiles-Ordner als Subscription-Ordner mit txt-Dateien zu den XML-Pfaden */
+			ArrayList<String> newXMLFiles = getXMLpathsFromSubscription(DIR);
+			
+			if(newXMLFiles.isEmpty()) {
+				System.out.println("\nAcquisition: Keine neuen XML-Dateien gefunden.");
+			} else {		
+				for(int i=0; i<newXMLFiles.size(); i++) {
+					handl = new NewsContentHandler();
+					
+					System.out.println("\nNeue Datei: "+newXMLFiles.get(i));
+					if(!readXMLFile(newXMLFiles.get(i), handl))
+						continue;
+					
+					while(!handl.hasStoppedReading()) {
+						try {
+							Thread.sleep(1000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
 						}
-			//			System.out.println(buf.toString());	// for testing
 					}
-			//		return Results.ok(buf.toString());	// for testing
-					isReading = false;
+					
+	//				showMeWhatYouGot(handl); 	// for testing
+					
+					Calendar threeMonthsAgo = Calendar.getInstance();
+					threeMonthsAgo.add(Calendar.MONTH, -VALID_MONTH_COUNT);
+					Date tempDate = handl.getPublicationDate();
+					if(tempDate.compareTo(threeMonthsAgo.getTime()) < 0) {
+	//					System.out.println("Acquisition: Article is older than three months and will not be analysed.");
+						System.out.println("Acquisition: Der Artikel ist aelter als 3 Monate und wird nicht analysiert.");
+	
+						/* Achtung! Löscht XML-Datei aus dem angegebenen Ordner
+						 * Nur in Verbindung mit searchNewXMLFiles() nutzen	
+						 * 
+						 * deleteFile(newXMLFiles.get(i));
+						 */				
+						continue;
+					}
+					
+					String title = "Kein Titel";
+					if(!handl.getTitle().equals(""))
+						title = handl.getTitle();
+					
+					Analysis.addNewDocument(
+							title,
+							tempDate,
+							handl.getUrlSource(),
+							handl.getUrlPicture(),
+							handl.getText(),
+							handl.getTeaser(),
+							handl.getNewsPortal()); 
+					
+					articleCount++;
+					
+					/* Achtung! Löscht XML-Datei aus dem angegebenen Ordner
+					 * Nur in Verbindung mit searchNewXMLFiles() nutzen	
+					 * 
+					 * deleteFile(newXMLFiles.get(i));
+					 */
+					
+	//				buf.append(handl.getXMLString()+"\n\n-----------------------------------------------\n\n\n");	// for testing
 				}
+	//			System.out.println(buf.toString());	// for testing
+			}
+			isReading = false;
+		}
 	}
 	
 	/**
