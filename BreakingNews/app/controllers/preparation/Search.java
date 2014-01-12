@@ -69,15 +69,15 @@ public class Search {
 	 * Anzahl der zu ermittelnden Suchergebnisse, wenn Liste mit Listenbeginn
 	 * startet
 	 */
-	private static int hitsPerAppend = 3;
+	private final static int HITS_PER_APPEND = 3;
 	/**
 	 * Anzahl der zu ermittelnden Suchergebnisse, wenn Liste fortgesetzt wird
 	 */
-	private static int hitsPerPage = 5;
+	private final static int HITS_PER_PAGE = 5;
 	/** Gibt in ganzen Tagen an, wie weit bei Suchanfragen in die Vergangenheit
 	 * zur&uuml;ckgeschaut werden soll
 	 */
-	private static int timeframe = 90;
+	private static int TIME_FRAME = 90;
 	/**
 	 * Gibt das aktuelle Datum als Integer zur&uuml;ck.
 	 * 
@@ -97,7 +97,7 @@ public class Search {
 	public static long getLowerBound() {
 		Calendar c = Calendar.getInstance();
 		c.setTime(new Date());
-		c.add(Calendar.DAY_OF_MONTH, -timeframe);
+		c.add(Calendar.DAY_OF_MONTH, -TIME_FRAME);
 		DateFormat df = new SimpleDateFormat("yyyyMMddHHmm");
 		return Long.parseLong(df.format(c.getTime()));
 	}
@@ -270,13 +270,13 @@ public class Search {
 			if (offset == 0) {
 				// Listenanfang
 				end = false;
-				hits = searcher.search(booleanQuery, hitsPerPage, sort).scoreDocs;
+				hits = searcher.search(booleanQuery, HITS_PER_PAGE, sort).scoreDocs;
 			} else {
 				// Listenfortsetzung
 				if (end) {
 					hits = null;
 				} else {
-					hits = searcher.searchAfter(lastDoc, booleanQuery, hitsPerAppend, sort).scoreDocs;
+					hits = searcher.searchAfter(lastDoc, booleanQuery, HITS_PER_APPEND, sort).scoreDocs;
 				}
 			}
 			// Caching des jeweils letzten Dokuments der Suchanfrage, damit

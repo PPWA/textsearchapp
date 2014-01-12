@@ -12,3 +12,4 @@ Tue, 07 Jan 2014 11:03:01 CET: class RSSThread, method processSubscription, Writ
 Wed, 08 Jan 2014 11:33:44 CET: class RSSThread, method readSourceFile, Ignoring invalid URI: www.main-netz.de/rss/kultur.xml
 Wed, 08 Jan 2014 12:54:36 CET: class RSSThread, method readSourceFile, Ignoring invalid URI: www.main-netz.de/rss/kultur.xml
 Wed, 08 Jan 2014 14:59:47 CET: class RSSThread, method readSourceFile, Ignoring invalid URI: www.main-netz.de/rss/kultur.xml
+Sun, 12 Jan 2014 15:48:01 CET: class RSSThread, method readSourceFile, Ignoring invalid URI: www.main-netz.de/rss/kultur.xml
