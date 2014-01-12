@@ -8,14 +8,14 @@ package controllers.acquisition;
  */
 public class RefreshThread implements Runnable {
 	
-	private static final int MINUTES = 1;
+	private static final int DELTA_RELOAD_SERVER = 1*60*1000;
 	private boolean running = true;
 
 	@Override
 	public void run() {
 		while(running) {
 			try {
-				Thread.sleep(MINUTES*60*1000);
+				Thread.sleep(DELTA_RELOAD_SERVER);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
