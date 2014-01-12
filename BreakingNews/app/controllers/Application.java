@@ -44,7 +44,7 @@ public class Application extends Controller {
 	/**
 	 * Globale Referenz das Filehandle.
 	 */
-	private static File file = new File("index2");
+	private static final File FILE = new File("index2");
 	/**
 	 * &Uuml;berschriebene Similarity f&uuml;r alle Suchanfragen und Indexierungen
 	 */
@@ -72,7 +72,7 @@ public class Application extends Controller {
 	 */
 	public static IndexSearcher createSearcher() {
 		try {
-			IndexReader reader = DirectoryReader.open(FSDirectory.open(file));
+			IndexReader reader = DirectoryReader.open(FSDirectory.open(FILE));
 			IndexSearcher searcher = new IndexSearcher(reader);
 			searcher.setSimilarity(sim);
 			return searcher;
@@ -92,7 +92,7 @@ public class Application extends Controller {
 			IndexWriterConfig iwc = new IndexWriterConfig(Version.LUCENE_46,
 					analyzer).setSimilarity(sim);
 			iwc.setOpenMode(OpenMode.CREATE_OR_APPEND);
-			IndexWriter writer = new IndexWriter(FSDirectory.open(file), iwc);
+			IndexWriter writer = new IndexWriter(FSDirectory.open(FILE), iwc);
 			return writer;
 		} catch (Exception e) {
 			System.out.println("Index-Verzeichnis nicht vorhanden.");
@@ -115,7 +115,7 @@ public class Application extends Controller {
 	 */
 	public static int getNumberOfAllDocuments() {
 		try {
-			IndexReader reader = DirectoryReader.open(FSDirectory.open(file));
+			IndexReader reader = DirectoryReader.open(FSDirectory.open(FILE));
 			int temp = reader.numDocs();
 			reader.close();
 			return temp;
@@ -133,7 +133,7 @@ public class Application extends Controller {
 	 * @return Alle Terme inklusive Anzahl des Vorkommens im Dokument
 	 */
 	public static Map<String, Integer> getTermFrequencies(int docId) {
-		return getTermFrequencies(docId, file);
+		return getTermFrequencies(docId, FILE);
 	}
 	
 	/**
