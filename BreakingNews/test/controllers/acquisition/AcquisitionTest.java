@@ -20,6 +20,16 @@ public class AcquisitionTest {
 		
 		int newArticles = Json.toJson(Helpers.contentAsString(result)).intValue();
 		assertTrue("Result darf nicht negativ sein.", newArticles>=0);
+		
+		/*
+		Helpers.running(Helpers.fakeApplication(), new Runnable() {
+            public void run() {
+            	Result result = Acquisition.startSearch();
+            	
+            	Result fakeGetResult = Helpers.route(Helpers.fakeRequest(Helpers.GET, "/start-search"));
+                assertEquals("Das manuell erhaltene und das per GET-Request erhaltene Result sollten gleich sein.", result, fakeGetResult);
+            }
+        }); */
 	}
 
 	@Test

@@ -52,7 +52,7 @@ public class Preparation extends Controller {
 	 * @param offsetS
 	 *            Flag, ob Liste neu beginnen oder an letzter Stelle fortgesetzt
 	 *            werden soll
-	 * @param keyword
+	 * @param phrase
 	 *            Suchbegriff f&uuml;r Volltextsuche
 	 * @return Eine HTTP-Response mit Status-Code 200, MIMETYPE text/json und
 	 *         einem JSON-String, der die Meta-Daten der aktuellsten f&uuml;nf

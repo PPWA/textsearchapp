@@ -15,7 +15,7 @@ public class IndexTest {
 	@Test
 	public void renderTemplate() {
 	  Content html = views.html.index.render("Early Bird News");
-	  assertEquals("Sollte Html ausliefern", "text/html", Helpers.contentType(html));
+	  assertEquals("Sollte Html ausliefern.", "text/html", Helpers.contentType(html));
 	}
 
 }
