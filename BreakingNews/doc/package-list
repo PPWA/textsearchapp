@@ -1,6 +1,6 @@
-
 controllers
 controllers.acquisition
 controllers.analysis
 controllers.preparation
 models
+views
